@@ -1,0 +1,49 @@
+{
+  "name": "slush-jade-stylus",
+  "description": "Scaffold for Gulp including Jade, Stylus, AWS s3 distributable uploader",
+  "version": "0.0.0",
+  "homepage": "https://github.com/SoluzioniFutura/slush-jade-stylus.git",
+  "author": {
+    "name": "Giovanni Bruno",
+    "email": "giovanni.bruno@soluzionifutura.it"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/SoluzioniFutura/slush-jade-stylus.git"
+  },
+  "bugs": {
+    "email": "giovanni.bruno@soluzionifutura.it"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/SoluzioniFutura/slush-jade-stylus/master/LICENSE"
+    }
+  ],
+  "main": "slushfile.js",
+  "engines": {
+    "node": ">= 0.10.26",
+    "npm": ">=1.4.3"
+  },
+  "scripts": {
+    "test": "echo \"No tests\""
+  },
+  "dependencies": {
+    "gulp": "*",
+    "gulp-install": "^0.2.0",
+    "inquirer": "^0.6.0"
+  },
+  "keywords": [
+    "slushgenerator",
+    "web",
+    "app",
+    "front-end",
+    "gulp",
+    "stylus",
+    "jade",
+    "browser-sync",
+	"s3",
+	"aws",
+    "scaffold"
+  ]
+}
