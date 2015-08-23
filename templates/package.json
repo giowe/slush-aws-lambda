@@ -1,0 +1,36 @@
+{
+  "name": "%name%",
+  "version": "%version%",
+  "description": "%description%",
+  "scripts": {
+    "test": "echo \"No test specified\" && exit 1"
+  },
+  "author": {
+	"name": "%author_name%",
+	"email": "%author_email%"
+  },
+  "main": "gulpfile.js",
+  "license": "%license%",
+  "devDependencies": {
+    "aws-sdk": "^2.1.46",
+    "del": "^1.2.1",
+    "gulp": "^3.9.0",
+    "gulp-callback": "0.0.3",
+    "gulp-clean": "^0.3.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-connect": "^2.2.0",
+    "gulp-jade": "^1.1.0",
+    "gulp-minify-html": "^1.0.4",
+    "gulp-sourcemaps": "^1.5.2",
+    "gulp-stylus": "^2.0.6",
+    "gulp-uglify": "^1.2.0",
+    "gulp-using": "0.0.1",
+    "gulp-zip": "^3.0.2",
+    "jade": "^1.11.0",
+    "yargs": "^3.20.0"
+  },
+  "custom": {
+    "s3_buket": "%s3_buket%",
+    "webserver_port": "%webserver_port%"
+  }
+}
