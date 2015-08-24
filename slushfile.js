@@ -12,8 +12,9 @@ var gulp = require('gulp'),
     install = require('gulp-install'),
     replace = require('gulp-replace'),
     inquirer = require('inquirer'),
+    del = require('del'),
+    colors = require('colors'),
     fs = require('fs');
-
 
 gulp.task('default', function (done) {
     inquirer.prompt([
@@ -23,20 +24,11 @@ gulp.task('default', function (done) {
         {type: 'input', name: 'project_author_name', message: 'Project author name:'},
         {type: 'input', name: 'project_author_email', message: 'Project author email:'},
         {type: 'input', name: 'project_author_email', message: 'Project license:', default: "MIT"},
-        {type: 'input', name: 'project_s3_buket', message: 'Project AWS s3 buket name (to store distributable .zip pakage file):'},
+        {type: 'input', name: 'project_s3_buket', message: 'Project AWS s3 buket name (in case you want to store distributable .zip pakage file):'},
         {type: 'input', name: 'project_webserver_port', message: 'Project webserver port:', default: "8080"}
-    ],
-    function (answers) {
-        var folderName = answers.project_name;
-        fs.mkdirSync(folderName);
-
-        function createDirectory(folders){
-            for(var i = 0; i < folders.length; i++){
-                fs.mkdirSync(folderName + '/' + folders[i])
-            }   
-        }
-
-        createDirectory([
+    ], function (project_answers) {
+        var folderName = project_answers.project_name;
+        var folders = [
             'src',
             'src/views',
             'src/views/pages',
@@ -48,21 +40,42 @@ gulp.task('default', function (done) {
             'src/scripts/vendor',
             'src/fonts',
             'src/images'
-        ]);
+        ];
 
-        gulp.src(__dirname + '/templates/.gitignore').pipe(gulp.dest(folderName));
-        gulp.src(__dirname + '/templates/gulpfile.js').pipe(gulp.dest(folderName));
-        gulp.src(__dirname + '/templates/src/**/*').pipe(gulp.dest(folderName + '/src/'));
+        function scaffold() {
+            fs.mkdirSync(folderName);
+            for (var i = 0; i < folders.length; i++) {
+                fs.mkdirSync(folderName + '/' + folders[i])
+            }
 
-        gulp.src(__dirname + '/templates/package.json')
-            .pipe(replace(/%name%/g, answers.project_name))
-            .pipe(replace(/%version%/g, answers.project_version))
-            .pipe(replace(/%description%/g, answers.project_description))
-            .pipe(replace(/%author_name%/g, answers.project_author_name))
-            .pipe(replace(/%author_email%/g, answers.project_author_email))
-            .pipe(replace(/%license%/g, answers.project_license))
-            .pipe(replace(/%s3_buket%/g, answers.project_s3_buket))
-            .pipe(replace(/%webserver_port%/g, answers.project_webserver_port))
-            .pipe(gulp.dest(folderName)).pipe(install());
+            gulp.src(__dirname + '/templates/.gitignore').pipe(gulp.dest(folderName));
+            gulp.src(__dirname + '/templates/gulpfile.js').pipe(gulp.dest(folderName));
+            gulp.src(__dirname + '/templates/src/**/*').pipe(gulp.dest(folderName + '/src/'));
+            gulp.src(__dirname + '/templates/package.json')
+                .pipe(replace(/%name%/g, project_answers.project_name))
+                .pipe(replace(/%version%/g, project_answers.project_version))
+                .pipe(replace(/%description%/g, project_answers.project_description))
+                .pipe(replace(/%author_name%/g, project_answers.project_author_name))
+                .pipe(replace(/%author_email%/g, project_answers.project_author_email))
+                .pipe(replace(/%license%/g, project_answers.project_license))
+                .pipe(replace(/%s3_buket%/g, project_answers.project_s3_buket))
+                .pipe(replace(/%webserver_port%/g, project_answers.project_webserver_port))
+                .pipe(gulp.dest(folderName)).pipe(install());
+        }
+
+        try {
+            scaffold()
+        } catch(err) {
+            console.log("["+"!".red +"]", "'"+project_answers.project_name.cyan + "' folder already exists!");
+            inquirer.prompt({ type: "confirm", name: 'delete_folder', message: 'Do you want to delete it and continue with the new project?:', default: false}, function(delete_answer){
+                if (delete_answer.delete_folder){
+                    del.sync(project_answers.project_name, {force:true});
+                    scaffold();
+                }
+                else {
+                    console.log("["+"!".red +"]", "Scaffolding process aborted.")
+                }
+            })
+        }
     });
 });

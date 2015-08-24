@@ -14,7 +14,7 @@
   "bugs": {
     "email": "giovanni.bruno@soluzionifutura.it"
   },
-  "licenses": [
+  "license": [
     {
       "type": "MIT",
       "url": "https://github.com/SoluzioniFutura/slush-jade-stylus/master/LICENSE"
@@ -29,6 +29,8 @@
     "test": "echo \"No tests\""
   },
   "dependencies": {
+    "colors": "^1.1.2",
+    "del": "^1.2.1",
     "gulp": "*",
     "gulp-install": "^0.2.0",
     "gulp-replace": "^0.5.4",

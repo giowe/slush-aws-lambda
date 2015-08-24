@@ -1,21 +1,22 @@
 'use strict';
 
-var gulp = require('gulp');
-var connect = require('gulp-connect');
-var jade = require('gulp-jade');
-var stylus = require('gulp-stylus');
-var using = require('gulp-using');
-var zip = require('gulp-zip');
-var concat = require('gulp-concat');
-var uglify = require('gulp-uglify');
-var sourcemaps = require('gulp-sourcemaps');
-var minifyHTML = require('gulp-minify-html');
-var gcallback = require('gulp-callback');
-var argv = require('yargs').argv;
-var del = require('del');
-var fs = require('fs');
-var AWS = require('aws-sdk');
-var pkg = require('./package.json');
+var gulp = require('gulp'),
+    using = require('gulp-using'),
+    connect = require('gulp-connect'),
+    jade = require('gulp-jade'),
+    minifyHTML = require('gulp-minify-html'),
+    stylus = require('gulp-stylus'),
+    autoprefixer = require('autoprefixer-stylus'),
+    uglifycss = require('gulp-uglifycss'),
+    sourcemaps = require('gulp-sourcemaps'),
+    concat = require('gulp-concat'),
+    uglify = require('gulp-uglify'),
+    zip = require('gulp-zip'),
+    gcallback = require('gulp-callback'),
+    del = require('del'),
+    fs = require('fs'),
+    AWS = require('aws-sdk'),
+    pakage = require('./package.json');
 
 /**
  * Elimina la cartella dei raw se non specificato alcun parametro
@@ -23,32 +24,21 @@ var pkg = require('./package.json');
  * --all: elimina le cartelle dist e raw
  */
 gulp.task('clean', function () {
-    if (argv.all) {
-        del(['dist', 'raw'], {force:true});
-    }
-    else {
-        del.sync(argv.dist ? 'dist' : 'raw', {force:true});
-    }
+    del.sync('dist', {force:true});
 });
 
 /**
  * compila il jade
  */
 gulp.task('jade', function () {
-    return gulp.src('src/views/pages/*.jade')
-        .pipe(jade())
-        .pipe(gulp.dest(argv.dist ? 'dist/' : 'raw/'))
-        .pipe(connect.reload())
-        .pipe(using());
-});
-
-/**
- * minifizza l'html renderizzato
- */
-gulp.task('minify-html', ['jade'], function(){
-    gulp.src('./static/html/*.html')
+    return gulp.src([
+        'src/views/pages/*.jade',
+        '!src/views/pages/_*.jade'
+    ])
+        .pipe(jade()).on('error', console.log)
         .pipe(minifyHTML())
         .pipe(gulp.dest('dist/'))
+        .pipe(connect.reload())
         .pipe(using());
 });
 
@@ -57,22 +47,19 @@ gulp.task('minify-html', ['jade'], function(){
  * --dist: viene anche minifizzato
  */
 gulp.task('stylus', function () {
-    var params = { 'include css' : true };
-    var dest;
-    if (argv.dist) {
-        dest = 'dist';
-        params.compress = true;
-    }
-    else {
-        dest = 'raw';
-        params.linenos = true;
-    }
-
-    gulp.src('src/styles/*.styl')
+    gulp.src([
+        'src/styles/*.styl',
+        '!src/styles/_*.styl'
+    ])
         .pipe(sourcemaps.init())
-        .pipe(stylus(params))
-        .pipe(sourcemaps.write())
-        .pipe(gulp.dest(dest+'/public/styles'))
+        .pipe(stylus({
+            'include css': true,
+            use: [autoprefixer()],
+            compress : true
+        })).on('error', console.log)
+        .pipe(uglifycss())
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest('dist/public/styles'))
         .pipe(connect.reload())
         .pipe(using());
 });
@@ -81,19 +68,22 @@ gulp.task('stylus', function () {
  *
  */
 gulp.task('js', function () {
-    console.log('ciao');
+    gulp.src([
+        'src/public/scripts/**/*.js',
+        '!src/public/scripts/**/_*.js'
+    ])
+        .pipe(sourcemaps.init())
+        .pipe(concat('scripts.js'))
+        .pipe(uglify())
+        .pipe(sourcemaps.write('.'))
+        .pipe(gulp.dest('dist/public/'));
 });
 
 /**
  * costruisce la soluzione
  */
 gulp.task('build', function(){
-    if (argv.dist) {
-        gulp.start(['clean', 'stylus', 'jade', 'minify-html']);
-    }
-    else {
-        gulp.start(['clean', 'stylus', 'jade']);
-    }
+    gulp.start(['clean', 'stylus', 'jade', 'js']);
 });
 
 /**
@@ -102,6 +92,7 @@ gulp.task('build', function(){
 gulp.task('watch', function () {
     gulp.watch(['src/views/**/*.jade'], ['jade']);
     gulp.watch(['src/styles/**/*.styl'], ['stylus']);
+    gulp.watch(['src/scripts/*.js'], ['js']);
 });
 
 /**
@@ -109,11 +100,10 @@ gulp.task('watch', function () {
  */
 gulp.task('connect', ['build'], function() {
     connect.server({
-        root: argv.dist ? 'dist/' : 'raw/',
-        port: argv.port ? argv.port : 8080,
+        root: 'dist/',
+        port: pakage.custom.port ? pakage.custom.port : 8080,
         livereload: true,
-
-        fallback: argv.dist ? 'dist/home.html' : 'raw/home.html'
+        fallback: 'dist/home.html'
     });
 });
 
@@ -121,13 +111,12 @@ gulp.task('connect', ['build'], function() {
  * crea il pacchetto zip dei dist
  */
 gulp.task("zip", function(next){
-    argv.dist = true;
     gulp.start('build')
 
             gcallback(function(){console.log('ciao')})
         //console.log('cioa');
         //gulp.src("dist/**/*")
-        //    .pipe(zip(pkg.name+'.zip'))
+        //    .pipe(zip(pakage.name+'.zip'))
         //    .pipe(gulp.dest('dist'))
         //    .pipe(gcallback(function(){console.log('ciao')}));
 });
@@ -139,8 +128,8 @@ gulp.task("upload", ["zip"], function(){
     var s3 = new AWS.S3();
     var params = {
         Bucket: 'sf-dist',
-        Key:/* pkg.name + '/' +*/ pkg.name + '.zip',
-        Body: fs.createReadStream('dist/' + pkg.name + '.zip')
+        Key:/* pakage.name + '/' +*/ pakage.name + '.zip',
+        Body: fs.createReadStream('dist/' + pakage.name + '.zip')
     };
 
     s3.upload(params, function(err, data) {
