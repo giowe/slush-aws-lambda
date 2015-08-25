@@ -17,7 +17,7 @@ var gulp = require('gulp'),
     fs = require('fs'),
     AWS = require('aws-sdk');
 
-var pakage = require('./package.json');
+var npmPackage = require('./package.json');
 
 gulp.task('clean', function () {
     del.sync('dist', {force:true});
@@ -77,23 +77,23 @@ gulp.task('watch', function () {
 
 gulp.task("zip", ['build'], function(){
     return gulp.src("dist/**/*")
-        .pipe(zip(pakage.name+'.zip'))
+        .pipe(zip(npmPackage.name+'.zip'))
         .pipe(gulp.dest('dist'));
 });
 
 gulp.task("upload", ["zip"], function(){
     var s3 = new AWS.S3(),
         params = {
-            Bucket: 'sf-dist',
-            Key: pakage.name + '/' + pakage.name + '.zip',
-            Body: fs.createReadStream('dist/' + pakage.name + '.zip')
+            Bucket: npmPackage.custom.s3_bucket,
+            Key: npmPackage.name + '/' + npmPackage.name + '.zip',
+            Body: fs.createReadStream('dist/' + npmPackage.name + '.zip')
         };
 
     s3.upload(params, function(err, data) {
         if (err) {
             console.log('['+ 'gulp'.red +']', 'Upload filed with error:',  err);
         } else {
-            console.log('['+ 'gulp'.green +']', (pakage.name + '.zip').cyan, 'succesfully uploaded to Aws S3 buket', params.Bucket.cyan, 'in the following location:', data.Location.cyan);
+            console.log('['+ 'gulp'.green +']', (npmPackage.name + '.zip').cyan, 'succesfully uploaded to Aws S3 buket', params.Bucket.cyan, 'in the following location:', data.Location.cyan);
         }
     });
 });
@@ -101,7 +101,7 @@ gulp.task("upload", ["zip"], function(){
 gulp.task('connect', ['build'], function() {
     connect.server({
         root: 'dist/',
-        port: pakage.custom.port ? pakage.custom.port : 8080,
+        port: npmPackage.custom.port ? npmPackage.custom.port : 8080,
         livereload: true,
         fallback: 'dist/home.html'
     });

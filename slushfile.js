@@ -24,7 +24,7 @@ gulp.task('default', function (done) {
         {type: 'input', name: 'project_author_name', message: 'Project author name:'},
         {type: 'input', name: 'project_author_email', message: 'Project author email:'},
         {type: 'input', name: 'project_license', message: 'Project license:', default: "MIT"},
-        {type: 'input', name: 'project_s3_buket', message: 'Project AWS s3 buket name (in case you want to store distributable .zip pakage file):'},
+        {type: 'input', name: 'project_s3_bucket', message: 'Project AWS s3 bucket name (in case you want to store distributable .zip package file):'},
         {type: 'input', name: 'project_webserver_port', message: 'Project webserver port:', default: "8080"}
     ], function (project_answers) {
         var folderName = project_answers.project_name;
@@ -48,20 +48,20 @@ gulp.task('default', function (done) {
                 fs.mkdirSync(folderName + '/' + folders[i])
             }
 
-            gulp.src('/templates/.gitignore').pipe(gulp.dest(folderName));
-            gulp.src('/templates/gulpfile.js').pipe(gulp.dest(folderName));
-            gulp.src('/templates/src/**/*').pipe(gulp.dest(folderName + '/src/'));
-            gulp.src('/templates/package.json')
+            gulp.src(__dirname + '/templates/.gitignore').pipe(gulp.dest(folderName));
+            gulp.src(__dirname + '/templates/gulpfile.js').pipe(gulp.dest(folderName));
+            gulp.src(__dirname + '/templates/src/**/*').pipe(gulp.dest(folderName + '/src/'));
+            gulp.src(__dirname + '/templates/package.json')
                 .pipe(replace(/%name%/g, project_answers.project_name))
                 .pipe(replace(/%version%/g, project_answers.project_version))
                 .pipe(replace(/%description%/g, project_answers.project_description))
                 .pipe(replace(/%author_name%/g, project_answers.project_author_name))
                 .pipe(replace(/%author_email%/g, project_answers.project_author_email))
                 .pipe(replace(/%license%/g, project_answers.project_license))
-                .pipe(replace(/%s3_buket%/g, project_answers.project_s3_buket))
+                .pipe(replace(/%s3_bucket%/g, project_answers.project_s3_buket))
                 .pipe(replace(/%webserver_port%/g, project_answers.project_webserver_port))
                 .pipe(gulp.dest(folderName)).pipe(install());
-            gulp.src('templates/README.MD')
+            gulp.src(__dirname + '/templates/README.MD')
                 .pipe(replace(/%name%/g, project_answers.project_name))
                 .pipe(gulp.dest(folderName));
         }
