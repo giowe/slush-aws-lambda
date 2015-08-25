@@ -1,0 +1,18 @@
+shallow_clone: true
+
+version: '1.0.{build}'
+
+skip_tags: true
+
+environment:
+  matrix:
+    - nodejs_version: '2'
+    - nodejs_version: '0'
+
+install:
+  - npm install
+
+build: off
+
+cache:
+  - node_modules -> package.json

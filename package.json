@@ -4,16 +4,18 @@
   "version": "0.0.0",
   "homepage": "https://github.com/SoluzioniFutura/slush-jade-stylus.git",
   "author": "Giovanni Bruno <giovanni.bruno@soluzionifutura.it>",
-  "contributors": [{
-    "name": "Giovanni Bruno",
-    "email": "giovanni.bruno@soluzionifutura.it"
-  }],
+  "contributors": [
+    {
+      "name": "Giovanni Bruno",
+      "email": "giovanni.bruno@soluzionifutura.it"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/SoluzioniFutura/slush-jade-stylus.git"
   },
   "bugs": {
-	"url": "https://github.com/SoluzioniFutura/slush-jade-stylus/issues"
+    "url": "https://github.com/SoluzioniFutura/slush-jade-stylus/issues"
   },
   "license": [
     {
