@@ -5,10 +5,11 @@
   "scripts": {
     "test": "echo \"No test specified\" && exit 1"
   },
-  "author": {
+  "author": "%author_name% <%author_email%>",
+  "contributors": [{
     "name": "%author_name%",
     "email": "%author_email%"
-  },
+  }],
   "main": "gulpfile.js",
   "license": "%license%",
   "devDependencies": {
