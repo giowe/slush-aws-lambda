@@ -1,22 +1,22 @@
 {
-  "name": "%name%",
-  "version": "%version%",
-  "description": "%description%",
+  "name": "slush-jade-stylus-project",
+  "version": "0.0.0",
+  "description": "",
   "scripts": {
     "test": "echo \"No test specified\" && exit 1"
   },
   "author": {
-	"name": "%author_name%",
-	"email": "%author_email%"
+    "name": "",
+    "email": "MIT"
   },
   "main": "gulpfile.js",
-  "license": "%license%",
+  "license": "undefined",
   "devDependencies": {
     "autoprefixer-stylus": "^0.7.1",
     "aws-sdk": "^2.1.46",
+    "colors": "^1.1.2",
     "del": "^1.2.1",
     "gulp": "^3.9.0",
-    "gulp-callback": "0.0.3",
     "gulp-concat": "^2.6.0",
     "gulp-connect": "^2.2.0",
     "gulp-jade": "^1.1.0",
@@ -29,7 +29,7 @@
     "gulp-zip": "^3.0.2"
   },
   "custom": {
-    "s3_buket": "%s3_buket%",
-    "webserver_port": "%webserver_port%"
+    "s3_buket": "sf-dist",
+    "webserver_port": "8080"
   }
 }

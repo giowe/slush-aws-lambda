@@ -1,5 +1,6 @@
 'use strict';
 
+require('colors');
 var gulp = require('gulp'),
     using = require('gulp-using'),
     connect = require('gulp-connect'),
@@ -12,24 +13,16 @@ var gulp = require('gulp'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
     zip = require('gulp-zip'),
-    gcallback = require('gulp-callback'),
     del = require('del'),
     fs = require('fs'),
-    AWS = require('aws-sdk'),
-    pakage = require('./package.json');
+    AWS = require('aws-sdk');
 
-/**
- * Elimina la cartella dei raw se non specificato alcun parametro
- * --dist: elimina le cartelle dist
- * --all: elimina le cartelle dist e raw
- */
+var pakage = require('./package.json');
+
 gulp.task('clean', function () {
     del.sync('dist', {force:true});
 });
 
-/**
- * compila il jade
- */
 gulp.task('jade', function () {
     return gulp.src([
         'src/views/pages/*.jade',
@@ -42,10 +35,6 @@ gulp.task('jade', function () {
         .pipe(using());
 });
 
-/**
- * compila lo stylus aggiungendo la sourcemap inline e linenos (solo per il raw)
- * --dist: viene anche minifizzato
- */
 gulp.task('stylus', function () {
     gulp.src([
         'src/styles/*.styl',
@@ -64,12 +53,11 @@ gulp.task('stylus', function () {
         .pipe(using());
 });
 
-/**
- *
- */
 gulp.task('js', function () {
     gulp.src([
-        'src/public/scripts/**/*.js',
+        'src/public/scripts/vendor/*.js',
+        /* PLACE HERE THE LINKS OF ALL VENDOR'S SCRIPTS THAT ARE NOT IN VENDOR FOLDER (EX. INSTALLED VIA NPM) */
+        'src/public/scripts/*.js',
         '!src/public/scripts/**/_*.js'
     ])
         .pipe(sourcemaps.init())
@@ -79,61 +67,43 @@ gulp.task('js', function () {
         .pipe(gulp.dest('dist/public/'));
 });
 
-/**
- * costruisce la soluzione
- */
-gulp.task('build', function(){
-    gulp.start(['clean', 'stylus', 'jade', 'js']);
-});
+gulp.task('build',['clean', 'stylus', 'jade', 'js']);
 
-/**
- * attiva i watcher di jade, stylus e js
- */
 gulp.task('watch', function () {
     gulp.watch(['src/views/**/*.jade'], ['jade']);
     gulp.watch(['src/styles/**/*.styl'], ['stylus']);
-    gulp.watch(['src/scripts/*.js'], ['js']);
+    gulp.watch(['src/scripts/**/*.js'], ['js']);
 });
 
-/**
- * crea il webserver
- */
+gulp.task("zip", ['build'], function(){
+    return gulp.src("dist/**/*")
+        .pipe(zip(pakage.name+'.zip'))
+        .pipe(gulp.dest('dist'));
+});
+
+gulp.task("upload", ["zip"], function(){
+    var s3 = new AWS.S3(),
+        params = {
+            Bucket: 'sf-dist',
+            Key: pakage.name + '/' + pakage.name + '.zip',
+            Body: fs.createReadStream('dist/' + pakage.name + '.zip')
+        };
+
+    s3.upload(params, function(err, data) {
+        if (err) {
+            console.log('['+ 'gulp'.red +']', 'Upload filed with error:',  err);
+        } else {
+            console.log('['+ 'gulp'.green +']', (pakage.name + '.zip').cyan, 'succesfully uploaded to Aws S3 buket', params.Bucket.cyan, 'in the following location:', data.Location.cyan);
+        }
+    });
+});
+
 gulp.task('connect', ['build'], function() {
     connect.server({
         root: 'dist/',
         port: pakage.custom.port ? pakage.custom.port : 8080,
         livereload: true,
         fallback: 'dist/home.html'
-    });
-});
-
-/**
- * crea il pacchetto zip dei dist
- */
-gulp.task("zip", function(next){
-    gulp.start('build')
-
-            gcallback(function(){console.log('ciao')})
-        //console.log('cioa');
-        //gulp.src("dist/**/*")
-        //    .pipe(zip(pakage.name+'.zip'))
-        //    .pipe(gulp.dest('dist'))
-        //    .pipe(gcallback(function(){console.log('ciao')}));
-});
-
-/**
- * carica il pacchetto zip dei dist sul suo bucket di s3
- */
-gulp.task("upload", ["zip"], function(){
-    var s3 = new AWS.S3();
-    var params = {
-        Bucket: 'sf-dist',
-        Key:/* pakage.name + '/' +*/ pakage.name + '.zip',
-        Body: fs.createReadStream('dist/' + pakage.name + '.zip')
-    };
-
-    s3.upload(params, function(err, data) {
-        console.log(err, data);
     });
 });
 
