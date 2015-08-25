@@ -12,12 +12,13 @@
     "url": "git://github.com/SoluzioniFutura/slush-jade-stylus.git"
   },
   "bugs": {
+	"url": "https://github.com/SoluzioniFutura/slush-jade-stylus/issues"
     "email": "giovanni.bruno@soluzionifutura.it"
   },
   "license": [
     {
       "type": "MIT",
-      "url": "https://github.com/SoluzioniFutura/slush-jade-stylus/master/LICENSE"
+      "url": "https://github.com/SoluzioniFutura/slush-jade-stylus/master/LICENSEhttps://github.com/SoluzioniFutura/slush-jade-stylus/blob/master/LICENSE"
     }
   ],
   "main": "slushfile.js",

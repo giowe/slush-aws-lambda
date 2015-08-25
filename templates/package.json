@@ -14,19 +14,20 @@
   "devDependencies": {
     "autoprefixer-stylus": "^0.7.1",
     "aws-sdk": "^2.1.46",
-    "colors": "^1.1.2",
+    "browser-sync": "^2.8.2",
     "del": "^1.2.1",
     "gulp": "^3.9.0",
     "gulp-concat": "^2.6.0",
-    "gulp-connect": "^2.2.0",
+    "gulp-if-else": "^1.0.3",
     "gulp-jade": "^1.1.0",
     "gulp-minify-html": "^1.0.4",
     "gulp-sourcemaps": "^1.5.2",
     "gulp-stylus": "^2.0.6",
     "gulp-uglify": "^1.2.0",
     "gulp-uglifycss": "^1.0.4",
-    "gulp-using": "0.0.1",
-    "gulp-zip": "^3.0.2"
+    "gulp-util": "^3.0.6",
+    "gulp-zip": "^3.0.2",
+    "yargs": "^3.21.0"
   },
   "custom": {
     "s3_bucket": "%s3_bucket%",
