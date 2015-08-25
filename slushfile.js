@@ -58,7 +58,7 @@ gulp.task('default', function (done) {
                 .pipe(replace(/%author_name%/g, project_answers.project_author_name))
                 .pipe(replace(/%author_email%/g, project_answers.project_author_email))
                 .pipe(replace(/%license%/g, project_answers.project_license))
-                .pipe(replace(/%s3_bucket%/g, project_answers.project_s3_buket))
+                .pipe(replace(/%s3_bucket%/g, project_answers.project_s3_bucket))
                 .pipe(replace(/%webserver_port%/g, project_answers.project_webserver_port))
                 .pipe(gulp.dest(folderName)).pipe(install());
             gulp.src(__dirname + '/templates/README.MD')
