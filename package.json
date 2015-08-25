@@ -1,6 +1,6 @@
 {
   "name": "slush-jade-stylus",
-  "description": "Scaffold for Gulp including Jade, Stylus, AWS s3 distributable uploader",
+  "description": "Slushgenerator for Gulp including Jade, Stylus and AWS s3 dist uploader.",
   "version": "0.0.0",
   "homepage": "https://github.com/SoluzioniFutura/slush-jade-stylus.git",
   "author": {
@@ -49,5 +49,9 @@
     "s3",
     "aws",
     "scaffold"
+    "uglify",
+    "uglifycss",
+    "concat",
+    "minify-html"
   ]
 }
