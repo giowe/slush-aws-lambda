@@ -12,17 +12,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/SoluzioniFutura/slush-jade-stylus.git"
+    "url": "https://github.com/SoluzioniFutura/slush-jade-stylus.git"
   },
   "bugs": {
     "url": "https://github.com/SoluzioniFutura/slush-jade-stylus/issues"
   },
-  "license": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/SoluzioniFutura/slush-jade-stylus/master/LICENSEhttps://github.com/SoluzioniFutura/slush-jade-stylus/blob/master/LICENSE"
-    }
-  ],
   "main": "slushfile.js",
   "engines": {
     "node": ">= 0.10.26",
@@ -55,5 +49,6 @@
     "uglifycss",
     "concat",
     "minify-html"
-  ]
+  ],
+  "license": "MIT"
 }

@@ -2,6 +2,7 @@
 
 var gulp = require('gulp'),
     gutil = require('gulp-util'),
+    plumber = require('gulp-plumber'),
     browsersync  = require('browser-sync'),
     jade = require('gulp-jade'),
     minifyHTML = require('gulp-minify-html'),
@@ -31,10 +32,14 @@ gulp.task('jade', function () {
         'src/views/pages/*.jade',
         '!src/views/pages/_*.jade'
     ])
+        .pipe(plumber())
         .pipe(jade({
             pretty: argv.pretty
-        })).on('error', console.log)
+        })).on('error', function(err){
+            gutil.log(gutil.colors.dim.white(err));
+        })
         .pipe(ifElse(!argv.pretty, minifyHTML))
+        .pipe(plumber.stop())
         .pipe(gulp.dest('dist/'))
         .pipe(browsersync.reload({stream: true}));
 });
@@ -43,6 +48,7 @@ gulp.task('stylus', function () {
     gulp.src([
         'src/styles/*.styl'
     ])
+        .pipe(plumber())
         .pipe(sourcemaps.init())
         .pipe(stylus({
             'include css': true,
@@ -52,6 +58,7 @@ gulp.task('stylus', function () {
         })).on('error', console.log)
         .pipe(ifElse(!argv.pretty, uglifycss))
         .pipe(sourcemaps.write('.'))
+        .pipe(plumber.stop())
         .pipe(gulp.dest('dist/public/styles'))
         .pipe(browsersync.reload({stream: true}));
 });
