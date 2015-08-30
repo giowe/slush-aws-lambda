@@ -54,7 +54,7 @@ gulp.task('stylus', function () {
         .pipe(sourcemaps.init())
         .pipe(stylus({
             'include css': true,
-            use: [autoprefixer()],
+            use: [autoprefixer({ browsers: ['last 3 versions', '> 5%'] })],
             compress : !argv.pretty,
             linenos : argv.pretty
         })).on('error', console.log)
@@ -136,6 +136,7 @@ gulp.task('serve', ['build', 'watch'], function(){
             baseDir: 'dist/',
             index: "index.html"
         },
+		logPrefix: npmPackage.name,
         open: true,
         notify: false,
         port: npmPackage.custom.port ? npmPackage.custom.port : 8080
