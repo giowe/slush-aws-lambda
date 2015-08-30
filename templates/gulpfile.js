@@ -3,6 +3,8 @@
 var gulp = require('gulp'),
     gutil = require('gulp-util'),
     plumber = require('gulp-plumber'),
+    imagemin = require('gulp-imagemin'),
+    pngquant = require('imagemin-pngquant'),
     browsersync  = require('browser-sync'),
     jade = require('gulp-jade'),
     minifyHTML = require('gulp-minify-html'),
@@ -77,12 +79,26 @@ gulp.task('js', function () {
         .pipe(browsersync.reload({stream: true}));
 });
 
-gulp.task('build',['clean', 'stylus', 'jade', 'js']);
+gulp.task('images', function(){
+    gulp.src('src/images/**/*.*')
+        .pipe(imagemin({
+            optimizationLevel: 3, //png
+            progressive: true,    //jpg
+            intralaced: false,    //gif
+            mutlipass: false,     //svg
+            svgoPlugins: [{removeViewBox: false}],
+            use: [pngquant()]
+        }))
+        .pipe(gulp.dest('dist/public/images'));
+});
+
+gulp.task('build',['clean', 'stylus', 'jade', 'js', 'images']);
 
 gulp.task('watch', function () {
     gulp.watch(['src/views/**/*.jade'], ['jade']);
     gulp.watch(['src/styles/**/*.styl'], ['stylus']);
     gulp.watch(['src/scripts/**/*.js'], ['js']);
+    gulp.watch(['src/images/**/*.*'], ['images']);
 });
 
 gulp.task("zip", ['build'], function(){
