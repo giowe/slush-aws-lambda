@@ -101,7 +101,7 @@ gulp.task('build',['clean', 'stylus', 'jade', 'js', 'images', 'fonts']);
 
 gulp.task('watch', function () {
     gulp.watch(['src/views/**/*.jade'], ['jade']);
-    gulp.watch(['src/styles/**/*.styl'], ['stylus']);
+    gulp.watch(['src/styles/**/*.*'], ['stylus']);
     gulp.watch(['src/scripts/**/*.js'], ['js']);
     gulp.watch(['src/images/**/*.*'], ['images']);
     gulp.watch(['src/fonts/**/*.*'], ['fonts']);
