@@ -13,6 +13,7 @@
   "main": "gulpfile.js",
   "license": "%license%",
   "devDependencies": {
+    "imagemin-pngquant": "^4.1.2",
     "autoprefixer-stylus": "^0.7.1",
     "aws-sdk": "^2.1.46",
     "browser-sync": "^2.8.2",
