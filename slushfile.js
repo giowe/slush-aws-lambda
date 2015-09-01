@@ -23,6 +23,9 @@ gulp.task('default', function (done) {
         {type: 'input', name: 'project_description', message: 'Project description:'},
         {type: 'input', name: 'project_author_name', message: 'Project author name:'},
         {type: 'input', name: 'project_author_email', message: 'Project author email:'},
+        {type: 'input', name: 'project_repo_type', message: 'Project repo type:', default: 'git'},
+        {type: 'input', name: 'project_repo_url', message: 'Project repo url:'},
+        {type: 'input', name: 'project_author_email', message: 'Project author email:'},
         {type: 'input', name: 'project_license', message: 'Project license:', default: "MIT"},
         {type: 'input', name: 'project_s3_bucket', message: 'Project AWS s3 bucket name (in case you want to store distributable .zip package file):'},
         {type: 'input', name: 'project_webserver_port', message: 'Project webserver port:', default: "8080"}
@@ -57,6 +60,8 @@ gulp.task('default', function (done) {
                 .pipe(replace(/%description%/g, project_answers.project_description))
                 .pipe(replace(/%author_name%/g, project_answers.project_author_name))
                 .pipe(replace(/%author_email%/g, project_answers.project_author_email))
+                .pipe(replace(/%repoType%/g, project_answers.project_repo_type))
+                .pipe(replace(/%repoUrl%/g, project_answers.project_repo_url))
                 .pipe(replace(/%license%/g, project_answers.project_license))
                 .pipe(replace(/%s3_bucket%/g, project_answers.project_s3_bucket))
                 .pipe(replace(/%webserver_port%/g, project_answers.project_webserver_port))

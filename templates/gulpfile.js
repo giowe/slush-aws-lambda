@@ -6,6 +6,7 @@ var gulp = require('gulp'),
     imagemin = require('gulp-imagemin'),
     pngquant = require('imagemin-pngquant'),
     browsersync  = require('browser-sync'),
+    data = require('gulp-data'),
     jade = require('gulp-jade'),
     minifyHTML = require('gulp-minify-html'),
     stylus = require('gulp-stylus'),
@@ -19,6 +20,7 @@ var gulp = require('gulp'),
     zip = require('gulp-zip'),
     del = require('del'),
     fs = require('fs'),
+    path = require('path'),
     AWS = require('aws-sdk');
 
 var npmPackage = require('./package.json');
@@ -35,6 +37,9 @@ gulp.task('jade', function () {
         '!src/views/pages/_*.jade'
     ])
         .pipe(plumber())
+        .pipe(data(function(file) {
+            return { page: (path.parse(file.path)).name}
+        }))
         .pipe(jade({
             pretty: argv.pretty
         })).on('error', function(err){
