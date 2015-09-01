@@ -42,10 +42,11 @@ gulp.task('jade', function () {
         }))
         .pipe(jade({
             pretty: argv.pretty
-        })).on('error', function(err){
-            gutil.log(gutil.colors.dim.white(err));
-        })
-        .pipe(ifElse(!argv.pretty, minifyHTML))
+        })).on('error', function(err){ gutil.log(gutil.colors.dim.white(err)); })
+        .pipe(ifElse(!argv.pretty, function(){return minifyHTML({
+            conditionals: true,
+            quotes:true
+        })}))
         .pipe(plumber.stop())
         .pipe(gulp.dest('dist/'))
         .pipe(browsersync.reload({stream: true}));
@@ -62,7 +63,7 @@ gulp.task('stylus', function () {
             use: [autoprefixer({ browsers: ['last 3 versions', '> 5%'] })],
             compress : !argv.pretty,
             linenos : argv.pretty
-        })).on('error', console.log)
+        })).on('error', function(err){ gutil.log(gutil.colors.dim.white(err)); })
         .pipe(ifElse(!argv.pretty, uglifycss))
         .pipe(sourcemaps.write('.'))
         .pipe(plumber.stop())
