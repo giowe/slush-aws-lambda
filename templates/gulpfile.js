@@ -49,7 +49,7 @@ gulp.task('jade', function () {
 });
 
 gulp.task('stylus', function () {
-    gulp.src([
+    return gulp.src([
         'src/styles/*.styl'
     ])
         .pipe($.plumber())
@@ -68,7 +68,7 @@ gulp.task('stylus', function () {
 });
 
 gulp.task('js', function () {
-    gulp.src([
+    return gulp.src([
         'src/scripts/vendor/*.js',
         /* PLACE HERE THE LINKS OF ALL VENDOR'S SCRIPTS THAT ARE NOT IN VENDOR FOLDER (EX. INSTALLED VIA NPM) */
         'src/scripts/**/*.js'
@@ -82,7 +82,7 @@ gulp.task('js', function () {
 });
 
 gulp.task('images', function(){
-    gulp.src('src/images/**/*.*')
+    return gulp.src('src/images/**/*.*')
         .pipe($.imagemin({
             optimizationLevel: 3, //png
             progressive: true,    //jpg
@@ -99,7 +99,7 @@ gulp.task('fonts', function(){
         .pipe(gulp.dest('dist/public/fonts'));
 });
 
-gulp.task('build',['clean', 'stylus', 'jade', 'js', 'images', 'fonts']);
+gulp.task('build',['clean', 'stylus', 'jade', 'js', 'fonts', 'images']);
 
 gulp.task('watch', function () {
     gulp.watch(['src/views/**/*.jade'], ['jade']);
