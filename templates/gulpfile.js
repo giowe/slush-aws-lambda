@@ -1,6 +1,6 @@
 'use strict';
 
-var gulp = require('gulp'),
+var gulp = require('gulp-help')(require('gulp')),
     pngquant = require('imagemin-pngquant'),
     browsersync  = require('browser-sync'),
     autoprefixer = require('autoprefixer-stylus'),
@@ -23,11 +23,11 @@ var npmPackage = require('./package.json');
 
 if (argv.pretty) $.util.log($.util.colors.bgMagenta('Pretty mode ON. All files will not be uglified.'));
 
-gulp.task('clean', function () {
+gulp.task('clean', 'Cleans your dist/ folder', function () {
     del.sync('dist', {force:true});
 });
 
-gulp.task('jade', function () {
+gulp.task('jade', 'Compiles and minifies your jade views', function () {
     return gulp.src([
         'src/views/pages/*.jade',
         '!src/views/pages/_*.jade'
@@ -44,11 +44,12 @@ gulp.task('jade', function () {
             quotes:true
         })}))
         .pipe($.plumber.stop())
+        .pipe($.size())
         .pipe(gulp.dest('dist/'))
         .pipe(browsersync.reload({stream: true}));
 });
 
-gulp.task('stylus', function () {
+gulp.task('stylus', 'Compiles and optimize your Stylus structure', function () {
     return gulp.src([
         'src/styles/*.styl'
     ])
@@ -63,11 +64,12 @@ gulp.task('stylus', function () {
         .pipe($.ifElse(!argv.pretty, $.uglifycss))
         .pipe($.sourcemaps.write('.'))
         .pipe($.plumber.stop())
+        .pipe($.size())
         .pipe(gulp.dest('dist/public/styles'))
         .pipe(browsersync.reload({stream: true}));
 });
 
-gulp.task('js', function () {
+gulp.task('js', 'Minifies your javascript into a single, concatenated file', function () {
     return gulp.src([
         'src/scripts/vendor/*.js',
         /* PLACE HERE THE LINKS OF ALL VENDOR'S SCRIPTS THAT ARE NOT IN VENDOR FOLDER (EX. INSTALLED VIA NPM) */
@@ -77,11 +79,12 @@ gulp.task('js', function () {
         .pipe($.concat('scripts.js'))
         .pipe($.ifElse(!argv.pretty, $.uglify))
         .pipe($.sourcemaps.write('.'))
+        .pipe($.size())
         .pipe(gulp.dest('dist/public/scripts'))
         .pipe(browsersync.reload({stream: true}));
 });
 
-gulp.task('images', function(){
+gulp.task('images', 'Optimize your images: png, jpg, gif and svg', function(){
     return gulp.src('src/images/**/*.*')
         .pipe($.imagemin({
             optimizationLevel: 3, //png
@@ -91,17 +94,18 @@ gulp.task('images', function(){
             svgoPlugins: [{removeViewBox: false}],
             use: [pngquant()]
         }))
+        .pipe($.size())
         .pipe(gulp.dest('dist/public/images'));
 });
 
-gulp.task('fonts', function(){
+gulp.task('fonts', 'Moves your fonts to the dist/ folder', function(){
     gulp.src('src/fonts/**/*.*')
         .pipe(gulp.dest('dist/public/fonts'));
 });
 
-gulp.task('build',['clean', 'stylus', 'jade', 'js', 'fonts', 'images']);
+gulp.task('build', 'Build task, calls:', ['clean', 'stylus', 'jade', 'js', 'fonts', 'images']);
 
-gulp.task('watch', function () {
+gulp.task('watch', 'Watch for changes on your project files', function () {
     gulp.watch(['src/views/**/*.jade'], ['jade']);
     gulp.watch(['src/styles/**/*.*'], ['stylus']);
     gulp.watch(['src/scripts/**/*.js'], ['js']);
@@ -109,13 +113,14 @@ gulp.task('watch', function () {
     gulp.watch(['src/fonts/**/*.*'], ['fonts']);
 });
 
-gulp.task("zip", ['build'], function(){
+gulp.task("zip", 'zip your dist/ folder, calls:', ['build'], function(){
     return gulp.src("dist/**/*")
         .pipe($.zip(npmPackage.name+'.zip'))
+        .pipe($.size())
         .pipe(gulp.dest('dist'));
 });
 
-gulp.task("upload", ["zip"], function(){
+gulp.task("upload", 'Upload your project on AWS, calls:', ["zip"], function(){
     var s3 = new AWS.S3(),
         params = {
             Bucket: npmPackage.custom.s3_bucket,
@@ -132,7 +137,7 @@ gulp.task("upload", ["zip"], function(){
     });
 });
 
-gulp.task('serve', ['build', 'watch'], function(){
+gulp.task('serve', 'Build a web server and live-reload on change, calls:', ['build', 'watch'], function(){
     browsersync.init(null, {
         server: {
             baseDir: 'dist/',
@@ -145,4 +150,4 @@ gulp.task('serve', ['build', 'watch'], function(){
     });
 });
 
-gulp.task('default', ['serve']);
+gulp.task('default', 'Default Task, calls:', ['serve']);
