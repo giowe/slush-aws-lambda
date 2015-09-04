@@ -25,7 +25,6 @@ gulp.task('default', function (done) {
         {type: 'input', name: 'project_author_email', message: 'Project author email:'},
         {type: 'input', name: 'project_repo_type', message: 'Project repo type:', default: 'git'},
         {type: 'input', name: 'project_repo_url', message: 'Project repo url:'},
-        {type: 'input', name: 'project_author_email', message: 'Project author email:'},
         {type: 'input', name: 'project_license', message: 'Project license:', default: "MIT"},
         {type: 'input', name: 'project_s3_bucket', message: 'Project AWS s3 bucket name (in case you want to store distributable .zip package file):'},
         {type: 'input', name: 'project_webserver_port', message: 'Project webserver port:', default: "8080"}
@@ -81,7 +80,7 @@ gulp.task('default', function (done) {
                     scaffold();
                 }
                 else {
-                    console.log("["+"!".red +"]", "Scaffolding process aborted.")
+                    console.log("!".red, "Scaffolding process aborted.")
                 }
             })
         }
