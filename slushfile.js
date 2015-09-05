@@ -17,19 +17,35 @@ var gulp = require('gulp'),
     fs = require('fs');
 
 gulp.task('default', function (done) {
+
+    try {
+        var userDefaults = require('./user_defaults.json');
+    } catch(err) {
+        userDefaults = null;
+    }
+
     inquirer.prompt([
         {type: 'input', name: 'project_name', message: 'Project name:', default: 'slush-jade-stylus-project'},
         {type: 'input', name: 'project_version', message: 'Project version:', default: '0.0.0'},
         {type: 'input', name: 'project_description', message: 'Project description:'},
-        {type: 'input', name: 'project_author_name', message: 'Project author name:'},
-        {type: 'input', name: 'project_author_email', message: 'Project author email:'},
-        {type: 'input', name: 'project_repo_type', message: 'Project repo type:', default: 'git'},
+        {type: 'input', name: 'project_author_name', message: 'Project author name:', default: userDefaults.project_author_name? userDefaults.project_author_name:null},
+        {type: 'input', name: 'project_author_email', message: 'Project author email:', default: userDefaults.project_author_email? userDefaults.project_author_email : null},
+        {type: 'input', name: 'project_repo_type', message: 'Project repo type:', default: userDefaults.project_repo_type? userDefaults.project_repo_type : 'git'},
         {type: 'input', name: 'project_repo_url', message: 'Project repo url:'},
-        {type: 'input', name: 'project_author_email', message: 'Project author email:'},
-        {type: 'input', name: 'project_license', message: 'Project license:', default: "MIT"},
-        {type: 'input', name: 'project_s3_bucket', message: 'Project AWS s3 bucket name (in case you want to store distributable .zip package file):'},
-        {type: 'input', name: 'project_webserver_port', message: 'Project webserver port:', default: "8080"}
+        {type: 'input', name: 'project_license', message: 'Project license:', default: userDefaults.project_license? userDefaults.project_license : 'MIT'},
+        {type: 'input', name: 'project_s3_bucket', message: 'Project AWS s3 bucket name (in case you want to store distributable .zip package file):', default: userDefaults.project_s3_bucket? userDefaults.project_s3_bucket : null},
+        {type: 'input', name: 'project_webserver_port', message: 'Project webserver port:', default: userDefaults.project_webserver_port? userDefaults.project_webserver_port : '8080'}
     ], function (project_answers) {
+        userDefaults.project_author_name = project_answers.project_author_name;
+        userDefaults.project_author_email = project_answers.project_author_email;
+        userDefaults.project_repo_type = project_answers.project_repo_type;
+        userDefaults.project_license = project_answers.project_license;
+        userDefaults.project_s3_bucket = project_answers.project_s3_bucket;
+        userDefaults.projectWebserverPort = project_answers.project_webserver_port;
+        fs.writeFile(__dirname+'/user_defaults.json', JSON.stringify(userDefaults, null, 4), function(err) {
+            if(err) console.log(err.red);
+        });
+
         var folderName = project_answers.project_name;
         var folders = [
             'src',
