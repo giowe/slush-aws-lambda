@@ -69,19 +69,29 @@ gulp.task('stylus', 'Compiles and optimize your Stylus structure', function () {
         .pipe(browsersync.reload({stream: true}));
 });
 
-gulp.task('js', 'Minifies your javascript into a single, concatenated file', function () {
-    return gulp.src([
+gulp.task('js', 'Minifies your javascript into a single, concatenated file for all js files that non have the "_" char as a prefix. All js prefixed with "_" char are minified and copied to the dist folder as separated files.', function () {
+    gulp.src([
+        '!src/scripts/**/_*.js',
         'src/scripts/vendor/*.js',
-        /* PLACE HERE THE LINKS OF ALL VENDOR'S SCRIPTS THAT ARE NOT IN VENDOR FOLDER (EX. INSTALLED VIA NPM) */
         'src/scripts/**/*.js'
+        /* PLACE HERE THE LINKS OF ALL VENDOR'S SCRIPTS THAT ARE NOT IN VENDOR FOLDER (EX. INSTALLED VIA NPM) */
     ])
-        .pipe($.sourcemaps.init())
+        .pipe($.ifElse(argv.pretty, function(){$.sourcemaps.init()}))
         .pipe($.concat('scripts.js'))
         .pipe($.ifElse(!argv.pretty, $.uglify))
-        .pipe($.sourcemaps.write('.'))
+        .pipe($.ifElse(argv.pretty, function(){$.sourcemaps.write('.')}))
         .pipe($.size())
         .pipe(gulp.dest('dist/public/scripts'))
         .pipe(browsersync.reload({stream: true}));
+
+    gulp.src([
+        'src/scripts/**/_*.js'
+    ])
+        .pipe($.ifElse(!argv.pretty, $.uglify))
+        .pipe($.size())
+        .pipe(gulp.dest('dist/public/scripts'))
+        .pipe(browsersync.reload({stream: true}));
+
 });
 
 gulp.task('images', 'Optimize your images: png, jpg, gif and svg', function(){
