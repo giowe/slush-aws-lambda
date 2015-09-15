@@ -73,8 +73,8 @@ gulp.task('js', 'Minifies your javascript into a single, concatenated file for a
     gulp.src([
         '!src/scripts/**/_*.js',
         'src/scripts/vendor/*.js',
-        'src/scripts/**/*.js'
         /* PLACE HERE THE LINKS OF ALL VENDOR'S SCRIPTS THAT ARE NOT IN VENDOR FOLDER (EX. INSTALLED VIA NPM) */
+        'src/scripts/**/*.js'
     ])
         .pipe($.ifElse(argv.pretty, function(){$.sourcemaps.init()}))
         .pipe($.concat('scripts.js'))

@@ -1,7 +1,7 @@
 {
   "name": "slush-jade-stylus",
   "description": "Slush generator for Gulp including Jade, Stylus and AWS s3 dist uploader.",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "homepage": "https://github.com/SoluzioniFutura/slush-jade-stylus.git",
   "author": "Giovanni Bruno <giovanni.bruno@soluzionifutura.it>",
   "contributors": [
