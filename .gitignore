@@ -1,4 +1,5 @@
 node_modules/**/*
 .idea/
 dist/
+user_defaults.json
 *.log
