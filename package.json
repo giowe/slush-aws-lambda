@@ -1,25 +1,21 @@
 {
-  "name": "slush-jade-stylus",
-  "description": "Slush generator for Gulp including Jade, Stylus and AWS s3 dist uploader.",
+  "name": "aws-lambda-slush-generator",
+  "description": "Slush generator that create the environment to work on a lambda function package and upload it to your aws account",
   "version": "0.0.17",
-  "homepage": "https://github.com/SoluzioniFutura/slush-jade-stylus.git",
+  "homepage": "https://github.com/giowe/AWS-Lambda-Slush-Generator",
   "author": "Giovanni Bruno <giovanni.bruno@soluzionifutura.it>",
   "contributors": [
     {
       "name": "Giovanni Bruno",
       "email": "giovanni.bruno@soluzionifutura.it"
-    },
-    {
-      "name": "Riccardo Zanutta",
-      "email": "zanuttar@gmail.com"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/SoluzioniFutura/slush-jade-stylus.git"
+    "url": "https://github.com/giowe/AWS-Lambda-Slush-Generator.git"
   },
   "bugs": {
-    "url": "https://github.com/SoluzioniFutura/slush-jade-stylus/issues"
+    "url": "https://github.com/giowe/AWS-Lambda-Slush-Generator/issues"
   },
   "main": "slushfile.js",
   "engines": {
@@ -39,19 +35,9 @@
   },
   "keywords": [
     "slushgenerator",
-    "jade",
-    "stylus",
-    "gulp",
-    "static",
-    "webapp",
-    "browser-sync",
     "aws",
-    "s3",
-    "uglify",
-    "uglifycss",
-    "concat",
-    "minify-html",
-	"imagemin"
+    "lambda",
+    "gulp"
   ],
   "license": "MIT"
 }

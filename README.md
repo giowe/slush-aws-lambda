@@ -1,4 +1,4 @@
-<h1>slush-jade-stylus</h1>
+<h1>aws-lambda-slush-generator</h1>
 <div>
 	<a href="https://www.npmjs.com/package/slush-jade-stylus"><img src='http://img.shields.io/npm/v/slush-jade-stylus.svg?style=flat'></a>
 	<a href="https://www.npmjs.com/package/slush-jade-stylus"><img src='https://img.shields.io/npm/dm/slush-jade-stylus.svg?style=flat-square'></a>

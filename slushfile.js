@@ -7,13 +7,12 @@
  */
 
 'use strict';
-
+require('colors');
 var gulp = require('gulp'),
     install = require('gulp-install'),
     replace = require('gulp-replace'),
     inquirer = require('inquirer'),
     del = require('del'),
-    colors = require('colors'),
     fs = require('fs');
 
 gulp.task('default', function (done) {
@@ -29,20 +28,17 @@ gulp.task('default', function (done) {
         {type: 'input', name: 'project_version', message: 'Project version:', default: '0.0.0'},
         {type: 'input', name: 'project_description', message: 'Project description:'},
         {type: 'input', name: 'project_author_name', message: 'Project author name:', default: userDefaults? userDefaults.project_author_name:null},
-        {type: 'input', name: 'project_author_email', message: 'Project author email:', default: userDefaults? userDefaults.project_author_email : null},
-        {type: 'input', name: 'project_repo_type', message: 'Project repo type:', default: userDefaults? userDefaults.project_repo_type : 'git'},
-        {type: 'input', name: 'project_repo_url', message: 'Project repo url:'},
-        {type: 'input', name: 'project_license', message: 'Project license:', default: userDefaults? userDefaults.project_license : 'MIT'},
-        {type: 'input', name: 'project_s3_bucket', message: 'Project AWS s3 bucket name (in case you want to store distributable .zip package file):', default: userDefaults? userDefaults.project_s3_bucket : null},
-        {type: 'input', name: 'project_webserver_port', message: 'Project webserver port:', default: userDefaults? userDefaults.project_webserver_port : '8080'}
+        {type: 'input', name: 'project_author_email', message: 'Project author email:', default: userDefaults? userDefaults.project_author_email : null}
+
+
+
+
+
     ], function (project_answers) {
 		userDefaults = {
 			project_author_name : project_answers.project_author_name,
 			project_author_email : project_answers.project_author_email,
-			project_repo_type : project_answers.project_repo_type,
-			project_license : project_answers.project_license,
-			project_s3_bucket : project_answers.project_s3_bucket,
-			project_webserver_port : project_answers.project_webserver_port
+			project_repo_type : project_answers.project_repo_type
 		};
 
         fs.writeFile(__dirname+'/user_defaults.json', JSON.stringify(userDefaults, null, 4), function(err) {
@@ -51,17 +47,7 @@ gulp.task('default', function (done) {
 
         var folderName = project_answers.project_name;
         var folders = [
-            'src',
-            'src/views',
-            'src/views/pages',
-            'src/views/includes',
-            'src/styles/',
-            'src/styles/vendor',
-            'src/styles/blocks',
-            'src/scripts',
-            'src/scripts/vendor',
-            'src/fonts',
-            'src/images'
+            'src'
         ];
 
         function scaffold() {
