@@ -1,5 +1,6 @@
 node_modules/**/*
 .idea/
 dist/
+test-lambda/
 user_defaults.json
 *.log

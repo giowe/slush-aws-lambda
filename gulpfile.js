@@ -24,7 +24,7 @@ gulp.task('default', function (done) {
     }
 
     inquirer.prompt([
-        {type: 'input', name: 'project_name', message: 'Project name:', default: 'my-lambda-project'},
+        {type: 'input', name: 'project_name', message: 'Project name:', default: 'test-lambda'},
         {type: 'input', name: 'project_version', message: 'Project version:', default: '0.0.0'},
         {type: 'input', name: 'project_description', message: 'Project description:'},
         {type: 'input', name: 'project_author_name', message: 'Project author name:', default: userDefaults? userDefaults.project_author_name:null},
