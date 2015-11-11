@@ -1,0 +1,16 @@
+{
+  "name": "%name%",
+  "version": "%version%",
+  "description": "%description%",
+  "scripts": {
+    "test": "echo \"No test specified\" && exit 1"
+  },
+  "author": "%author_name% <%author_email%>",
+  "contributors": [{
+    "name": "%author_name%",
+    "email": "%author_email%"
+  }],
+  "main": "gulpfile.js",
+  "devDependencies": {
+  }
+}

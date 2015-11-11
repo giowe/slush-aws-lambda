@@ -24,22 +24,21 @@ gulp.task('default', function (done) {
     }
 
     inquirer.prompt([
-        {type: 'input', name: 'project_name', message: 'Project name:', default: 'slush-jade-stylus-project'},
+        {type: 'input', name: 'project_name', message: 'Project name:', default: 'my-lambda-project'},
         {type: 'input', name: 'project_version', message: 'Project version:', default: '0.0.0'},
         {type: 'input', name: 'project_description', message: 'Project description:'},
         {type: 'input', name: 'project_author_name', message: 'Project author name:', default: userDefaults? userDefaults.project_author_name:null},
-        {type: 'input', name: 'project_author_email', message: 'Project author email:', default: userDefaults? userDefaults.project_author_email : null}
-
-
-
-
-
+        {type: 'input', name: 'project_author_email', message: 'Project author email:', default: userDefaults? userDefaults.project_author_email : null},
+        {type: 'input', name: 'project_repo_type', message: 'Project repo type:', default: userDefaults? userDefaults.project_repo_type : 'git'},
+        {type: 'input', name: 'project_repo_url', message: 'Project repo url:'},
+        {type: 'input', name: 'project_license', message: 'Project license:', default: userDefaults? userDefaults.project_license : 'MIT'}
     ], function (project_answers) {
-		userDefaults = {
-			project_author_name : project_answers.project_author_name,
-			project_author_email : project_answers.project_author_email,
-			project_repo_type : project_answers.project_repo_type
-		};
+        userDefaults = {
+            project_author_name : project_answers.project_author_name,
+            project_author_email : project_answers.project_author_email,
+            project_repo_type : project_answers.project_repo_type,
+            project_license : project_answers.project_license
+        };
 
         fs.writeFile(__dirname+'/user_defaults.json', JSON.stringify(userDefaults, null, 4), function(err) {
             if(err) console.log(err.red);
