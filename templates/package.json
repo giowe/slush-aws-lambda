@@ -10,6 +10,7 @@
     "name": "%author_name%",
     "email": "%author_email%"
   }],
+  "license": "%license%",
   "main": "gulpfile.js",
   "devDependencies": {
     "aws-sdk": "^2.2.16",

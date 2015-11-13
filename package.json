@@ -1,7 +1,7 @@
 {
   "name": "slush-aws-lambda",
   "description": "Slush generator that create the environment to work on a lambda function package and upload it to your aws account",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "homepage": "https://github.com/giowe/slush-aws-lambda",
   "author": "Giovanni Bruno <giovanni.bruno@soluzionifutura.it>",
   "contributors": [

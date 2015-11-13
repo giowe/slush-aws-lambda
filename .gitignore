@@ -3,4 +3,3 @@ node_modules/**/*
 dist/
 test-lambda/
 user_defaults.json
-*.log
