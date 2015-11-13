@@ -25,7 +25,7 @@ gulp.task('configure', function(next){
         {type: 'input', name: 'Region', message: 'Region:',  default: lambda_config? lambda_config.Region:"eu-west-1"},
         {type: 'input', name: 'Description', message: 'Description:',  default: lambda_config? lambda_config.ConfigOptions.Description:null},
         {type: 'input', name: 'Role', message: 'Role arn:',  default: lambda_config? lambda_config.ConfigOptions.Role:null},
-        {type: 'input', name: 'Handler', message: 'Handler:',  default: lambda_config? lambda_config.ConfigOptions.Handler:"index.js"},
+        {type: 'input', name: 'Handler', message: 'Handler:',  default: lambda_config? lambda_config.ConfigOptions.Handler:"index.handler"},
         {type: 'input', name: 'MemorySize', message: 'MemorySize:',  default: lambda_config? lambda_config.ConfigOptions.MemorySize:"128"},
         {type: 'input', name: 'Timeout', message: 'Timeout:',  default: lambda_config? lambda_config.ConfigOptions.Timeout:"3"}
     ], function (config_answers) {

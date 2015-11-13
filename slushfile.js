@@ -56,7 +56,7 @@ gulp.task('default', function (done) {
             }
 
             gulp.src(__dirname + '/templates/.gitignore').pipe(gulp.dest(folderName));
-            gulp.src(__dirname + '/templates/gulpfile.js').pipe(gulp.dest(folderName));
+            gulp.src(__dirname + '/templates/slushfile.js').pipe(gulp.dest(folderName));
             gulp.src([__dirname + '/templates/src/**/*', '!'+__dirname + '/templates/src/package.json']).pipe(gulp.dest(folderName + '/src/'));
             gulp.src(__dirname + '/templates/package.json')
                 .pipe(replace(/%name%/g, project_answers.project_name))
