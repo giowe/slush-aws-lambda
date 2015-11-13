@@ -1,0 +1,11 @@
+{
+  "name": "",
+  "description": "",
+  "author": "%author_name% <%author_email%>",
+  "contributors": [{
+    "name": "%author_name%",
+    "email": "%author_email%"
+  }],
+  "dependencies": {
+  }
+}

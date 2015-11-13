@@ -42,10 +42,12 @@ gulp.task('configure', function(next){
             }
         };
 
-        fs.writeFile(__dirname + '/lambda_config.json', JSON.stringify(lambda_config, null, 4), function (err) {
-            if (err) console.log(err.red);
-            else console.log('\n',lambda_config,'\n\n',"Lambda configuration saved.".green);
-        });
+        var lambdaPackage = require(path.join(__dirname,'src/package.json'));
+        lambdaPackage.name = config_answers.FunctionName;
+        lambdaPackage.description = config_answers.Description;
+        fs.writeFileSync(__dirname + '/src/package.json', JSON.stringify(lambdaPackage, null, 4));
+        fs.writeFileSync(__dirname + '/lambda_config.json', JSON.stringify(lambda_config, null, 4));
+        console.log('\n',lambda_config,'\n\n',"Lambda configuration saved.".green);
 
         next();
     });

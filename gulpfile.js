@@ -1,8 +1,8 @@
 /*
- * slush-jade-stylus
- * https://github.com/SoluzioniFutura/slush-jade-stylus
+ * AWS-Lambda-Slush-Generator
+ * https://github.com/giowe/AWS-Lambda-Slush-Generator
  *
- * Copyright (c) 2015, Giovanni Bruno
+ * Copyright (c) 2016, Giovanni Bruno
  * Licensed under the MIT license.
  */
 
@@ -57,7 +57,7 @@ gulp.task('default', function (done) {
 
             gulp.src(__dirname + '/templates/.gitignore').pipe(gulp.dest(folderName));
             gulp.src(__dirname + '/templates/gulpfile.js').pipe(gulp.dest(folderName));
-            gulp.src(__dirname + '/templates/src/**/*').pipe(gulp.dest(folderName + '/src/'));
+            gulp.src([__dirname + '/templates/src/**/*', '!'+__dirname + '/templates/src/package.json']).pipe(gulp.dest(folderName + '/src/'));
             gulp.src(__dirname + '/templates/package.json')
                 .pipe(replace(/%name%/g, project_answers.project_name))
                 .pipe(replace(/%version%/g, project_answers.project_version))
@@ -67,18 +67,21 @@ gulp.task('default', function (done) {
                 .pipe(replace(/%repoType%/g, project_answers.project_repo_type))
                 .pipe(replace(/%repoUrl%/g, project_answers.project_repo_url))
                 .pipe(replace(/%license%/g, project_answers.project_license))
-                .pipe(replace(/%s3_bucket%/g, project_answers.project_s3_bucket))
-                .pipe(replace(/%webserver_port%/g, project_answers.project_webserver_port))
                 .pipe(gulp.dest(folderName)).pipe(install());
+            gulp.src(__dirname + '/templates/src/package.json')
+                .pipe(replace(/%author_name%/g, project_answers.project_author_name))
+                .pipe(replace(/%author_email%/g, project_answers.project_author_email))
+                .pipe(gulp.dest(folderName + '/src/'));
             gulp.src(__dirname + '/templates/README.MD')
                 .pipe(replace(/%name%/g, project_answers.project_name))
                 .pipe(gulp.dest(folderName));
         }
 
         try {
-            scaffold()
+            scaffold();
         } catch(err) {
-            console.log("["+"!".red +"]", "'"+project_answers.project_name.cyan + "' folder already exists!");
+            console.log(err);
+            console.log("!".red, "'"+project_answers.project_name.cyan + "' folder already exists!");
             inquirer.prompt({ type: "confirm", name: 'delete_folder', message: 'Do you want to delete it and continue with the new project?:', default: false}, function(delete_answer){
                 if (delete_answer.delete_folder){
                     del.sync(project_answers.project_name, {force:true});
