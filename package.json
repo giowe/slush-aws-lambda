@@ -1,8 +1,8 @@
 {
-  "name": "aws-lambda-slush-generator",
+  "name": "slush-aws-lambda",
   "description": "Slush generator that create the environment to work on a lambda function package and upload it to your aws account",
   "version": "0.0.0",
-  "homepage": "https://github.com/giowe/AWS-Lambda-Slush-Generator",
+  "homepage": "https://github.com/giowe/slush-aws-lambda",
   "author": "Giovanni Bruno <giovanni.bruno@soluzionifutura.it>",
   "contributors": [
     {
@@ -12,10 +12,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/giowe/AWS-Lambda-Slush-Generator.git"
+    "url": "https://github.com/giowe/slush-aws-lambda.git"
   },
   "bugs": {
-    "url": "https://github.com/giowe/AWS-Lambda-Slush-Generator/issues"
+    "url": "https://github.com/giowe/slush-aws-lambda/issues"
   },
   "main": "slushfile.js",
   "engines": {

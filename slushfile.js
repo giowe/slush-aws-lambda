@@ -1,6 +1,6 @@
 /*
- * AWS-Lambda-Slush-Generator
- * https://github.com/giowe/AWS-Lambda-Slush-Generator
+ * slush-aws-lambda
+ * https://github.com/giowe/slush-aws-lambda
  *
  * Copyright (c) 2016, Giovanni Bruno
  * Licensed under the MIT license.
