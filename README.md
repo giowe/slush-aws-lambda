@@ -7,7 +7,7 @@
 	<a href="https://www.youtube.com/watch?v=Sagg08DrO5U"><img src='http://img.shields.io/badge/gandalf-approved-61C6FF.svg'></a>
 </div>
 
-Slush generator that creates the environment to work on an AWS Lambda function package and upload it on AWS.
+A slush generator to scaffold an AWS Lambda function package and upload it to AWS.
 
 ## Installation
 First of all you have to globally install [Slush](http://slushjs.github.io/#/), the streaming scaffolding system.
