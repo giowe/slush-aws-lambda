@@ -19,7 +19,7 @@ than you have to install globally the slush-aws-lambda generator
 npm install -g slush-aws-lambda
 ```
 
-## Installation
+## Deployment
 To create your solution you simply have to call the generator via slush cli from the directory where you want to deploy your project
 ```
 slush aws-lambda
