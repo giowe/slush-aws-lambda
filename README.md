@@ -7,40 +7,40 @@
 	<a href="https://www.youtube.com/watch?v=Sagg08DrO5U"><img src='http://img.shields.io/badge/gandalf-approved-61C6FF.svg'></a>
 </div>
 
-Slush generator that creates the environment to work on a lambda function package and upload it on AWS.
+Slush generator that creates the environment to work on an AWS Lambda function package and upload it on AWS.
 
 ## Installation
-First of all you have to install globally [Slush](http://slushjs.github.io/#/), the streaming scaffolding system.
+First of all you have to globally install [Slush](http://slushjs.github.io/#/), the streaming scaffolding system.
 ```
 npm install -g slush
 ```
-than you have to install globally the slush-aws-lambda generator
+then you have to install globally the slush-aws-lambda generator
 ```
 npm install -g slush-aws-lambda
 ```
 
 ## Deployment
-To create your solution you simply have to call the generator via slush cli from the directory where you want to deploy your project
+To create your solution you simply have to call the generator via the slush cli from the directory where you want to deploy your project
 ```
 slush aws-lambda
 ```
-Now some info about the project are required.
-You can always insert them later manually modifying the solution package.json (both in the project and in the lambda src folder)
+Now you must provide some info about the project.
+You can always insert this information manually later by modifying the solution package.json (both in the project and in the lambda src folder)
 
 ## Configuration
 To use the slush-aws-lambda solution it's important that you have properly installed the [aws-cli](http://docs.aws.amazon.com/cli/latest/userguide/installing.html) and
-configured your credentials.
+configured it with your credentials.
 
 Then, from the folder of your project, run the command
 ```gulp configure```
-You can set-up all settings of your lambda right now or in every moment later calling again this command or directly modifying the **lambda_config.json** and the **package.json** contained in lambda src folder
+You can set-up all settings of your AWS Lambda right now, or later at any time by calling this command again, or directly modifying the **lambda_config.json** and the **package.json** in lambda src folder
 
 ## Usage
-All you have to do is program you lambda function inside the **src** folder and when you are done you can run these commands:
-* `gulp create` - wraps all the content of src folder in a zip (previously uglifying all .js files) and sends it to AWS to create your new lambda function with all the configurations you set in **lambda_config.json** file;
-* `gulp update` - does exactly the same of the previous command, but on an existing lambda function;
-* `gulp update-code` - same as above, but updates only the code of your lambda without sending your configuration file;
-* `gulp update-code` - sends to AWS only your lambda configurations, but not the code;
+All you have to do is program you function inside the **src** folder; when you are done you can run the following commands:
+* `gulp create` - wraps everything inside the src folder in a zip file (after uglifying all of the .js files) and uploads it to AWS to create your new AWS Lambda using the configuration information you set in the **lambda_config.json** file;
+* `gulp update` - works exactly the same as the previous command, but on an existing AWS Lambda;
+* `gulp update-code` - same as above, but it only updates the code of your AWS Lambda without modifying the configuration;
+* `gulp update-code` - only changes your AWS Lambda configuration, but not the code;
 
 ## License
 
