@@ -1,4 +1,4 @@
-<h1>slush-aws-lambda</h1>
+# slush-aws-lambda
 <div>
 	<a href="https://www.npmjs.com/package/slush-aws-lambda"><img src='http://img.shields.io/npm/v/slush-aws-lambda.svg?style=flat'></a>
 	<a href="https://www.npmjs.com/package/slush-aws-lambda"><img src='https://img.shields.io/npm/dm/slush-aws-lambda.svg?style=flat-square'></a>
@@ -7,4 +7,62 @@
 	<a href="https://www.youtube.com/watch?v=Sagg08DrO5U"><img src='http://img.shields.io/badge/gandalf-approved-61C6FF.svg'></a>
 </div>
 
-work in progress on the documentation
+## Installation
+
+First of all you have to install globally [Slush](http://slushjs.github.io/#/), the streaming scaffolding system.
+```
+npm install -g slush
+```
+
+than you have to install globally the slush-aws-lambda generator
+```
+npm install -g slush-aws-lambda
+```
+
+## Installation
+
+To create your solution you simply have to call the generator via slush cli from the directory where you want to deploy your project
+```
+slush aws-lambda
+```
+Now some info about the project are required.
+You can always insert them later manually modifying the solution package.json (both in the project and in the lambda src folder)
+
+## Configuration
+To use the slush-aws-lambda solution it's important that you have properly installed the [aws-cli](http://docs.aws.amazon.com/cli/latest/userguide/installing.html) and
+configured your credentials.
+
+Then, from the folder of your project, run the command
+`gulp configure`
+You can set-up all settings of your lambda right now or in every moment later calling again this command or directly modifying the **lambda_config.json** and the **package.json** contained in lambda src folder
+
+## Usage
+All you have to do is program you lambda function inside the **src** folder and when you are done you can run these commands:
+* `gulp create` - wrap all the content of src folder in a zip (previously uglifying all .js files) and send it to aws to create your new lambda function with all the configurations you have set in **lambda_config.json** file;
+* `gulp update` - does exactly the same of the previous command, but on an existing lambda function;
+* `gulp update-code` - same as above, but update only the code of your lambda without send you configuration file;
+* `gulp update-code` - send only to aws you lambda configurations, but not the code;
+
+## License
+
+The MIT License (MIT)
+
+Copyright (c) 2016 Giovanni Bruno
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
