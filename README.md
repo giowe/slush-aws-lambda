@@ -32,7 +32,9 @@ To use the slush-aws-lambda solution it's important that you have properly insta
 configured it with your credentials.
 
 Then, from the folder of your project, run the command
-```gulp configure```
+```
+gulp configure
+```
 You can set-up all settings of your AWS Lambda right now, or later at any time by calling this command again, or directly modifying the **lambda_config.json** and the **package.json** in lambda src folder
 
 ## Usage
