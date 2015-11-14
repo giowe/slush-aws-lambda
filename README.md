@@ -7,20 +7,19 @@
 	<a href="https://www.youtube.com/watch?v=Sagg08DrO5U"><img src='http://img.shields.io/badge/gandalf-approved-61C6FF.svg'></a>
 </div>
 
-## Installation
+Slush generator that creates the environment to work on a lambda function package and upload it on AWS.
 
+## Installation
 First of all you have to install globally [Slush](http://slushjs.github.io/#/), the streaming scaffolding system.
 ```
 npm install -g slush
 ```
-
 than you have to install globally the slush-aws-lambda generator
 ```
 npm install -g slush-aws-lambda
 ```
 
 ## Installation
-
 To create your solution you simply have to call the generator via slush cli from the directory where you want to deploy your project
 ```
 slush aws-lambda
@@ -33,7 +32,7 @@ To use the slush-aws-lambda solution it's important that you have properly insta
 configured your credentials.
 
 Then, from the folder of your project, run the command
-`gulp configure`
+```gulp configure```
 You can set-up all settings of your lambda right now or in every moment later calling again this command or directly modifying the **lambda_config.json** and the **package.json** contained in lambda src folder
 
 ## Usage
