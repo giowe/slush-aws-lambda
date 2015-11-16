@@ -10,6 +10,7 @@
 require('colors');
 var gulp = require('gulp'),
     install = require('gulp-install'),
+    replace = require('gulp-replace'),
     rename = require('gulp-rename'),
     inquirer = require('inquirer'),
     del = require('del'),
@@ -55,7 +56,9 @@ gulp.task('default', function (done) {
                 fs.mkdirSync(folderName + '/' + folders[i])
             }
 
-            gulp.src(__dirname + '/templates/.gitignore').pipe(gulp.dest(folderName));
+            gulp.src(__dirname + '/templates/.template-gitignore')
+                .pipe(rename({basename:".gitignore"}))
+                .pipe(gulp.dest(folderName));
             gulp.src(__dirname + '/templates/gulpfile.js').pipe(gulp.dest(folderName));
             gulp.src([__dirname + '/templates/src/**/*', '!'+__dirname + '/templates/src/package.json']).pipe(gulp.dest(folderName + '/src/'));
             gulp.src(__dirname + '/templates/package.json')
