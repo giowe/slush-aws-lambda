@@ -16,7 +16,7 @@
   },
   "license": "%license%",
   "main": "gulpfile.js",
-  "devDependencies": {
+  "dependencies": {
     "gulp": "^3.9.0",
     "aws-sdk": "^2.2.16",
     "colors": "^1.1.2",
