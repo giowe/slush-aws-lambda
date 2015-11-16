@@ -10,7 +10,7 @@
 require('colors');
 var gulp = require('gulp'),
     install = require('gulp-install'),
-    replace = require('gulp-replace'),
+    rename = require('gulp-rename'),
     inquirer = require('inquirer'),
     del = require('del'),
     fs = require('fs');

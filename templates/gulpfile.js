@@ -129,7 +129,7 @@ gulp.task('delete',function(next){
 
 function checkConfig(){
     if (!lambda_config) {
-        console.log("lambda_config.json".red, "not found!", '\nRun "' + "gulp configure".cyan + '" task to set up your lambda details.' )
+        console.log("lambda_config.json".red, "not found!", '\nRun "' + "gulp configure".cyan + '" task to set up your lambda details.' );
         process.exit();
     }
 }
