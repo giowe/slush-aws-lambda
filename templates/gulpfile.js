@@ -69,7 +69,6 @@ gulp.task("create", function(next){
     const params = lambda_config.ConfigOptions;
     const lambda = new AWS.Lambda({ region: lambda_config.Region });
     params.Code = { ZipFile: zip };
-    params.Runtime = lambda_config.Runtime;
 
     lambda.createFunction(params, function(err, data) {
       if (err){
