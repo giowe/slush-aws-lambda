@@ -18,7 +18,6 @@ try {
   lambda_config = require(path.join(__dirname,'lambda_config.json'));
   CwLogs = require('./cw-logs');
 } catch(err) {
-  console.log(process.argv[2]);
   if (process.argv[2] && process.argv[2] !== "configure") {
     console.log('WARNING! lambda config not found, run command "gulp configure"');
     process.exit();
