@@ -10,12 +10,19 @@ const uglify   = require('gulp-uglify');
 const filter   = require('gulp-filter');
 const inquirer = require('inquirer');
 const AWS      = require('aws-sdk');
-const CwLogs   = require('./cw-logs');
 
+let CwLogs;
 let lambda_config;
+
 try {
   lambda_config = require(path.join(__dirname,'lambda_config.json'));
+  CwLogs = require('./cw-logs');
 } catch(err) {
+  console.log(process.argv[2]);
+  if (process.argv[2] && process.argv[2] !== "configure") {
+    console.log('WARNING! lambda config not found, run command "gulp configure"');
+    process.exit();
+  }
   lambda_config = null;
 }
 
