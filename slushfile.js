@@ -17,8 +17,7 @@ const del      = require('del');
 const fs       = require('fs');
 const path     = require('path');
 
-gulp.task('default', function(done) {
-  console.log('default tast');
+gulp.task('default', function() {
   try {
     var userDefaults = require('./user_defaults.json');
   } catch(err) {
