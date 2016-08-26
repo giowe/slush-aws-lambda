@@ -6,7 +6,6 @@ const data     = require('gulp-data');
 const fs       = require('fs');
 const path     = require('path');
 const zip      = require('gulp-zip');
-const uglify   = require('gulp-uglify');
 const filter   = require('gulp-filter');
 const inquirer = require('inquirer');
 const AWS      = require('aws-sdk');
@@ -27,7 +26,7 @@ try {
 
 gulp.task("default", ['configure']);
 
-gulp.task('configure', function(next){
+gulp.task('configure', function(){
   inquirer.prompt([
     {type: 'input', name: 'FunctionName', message: 'Function name:', default: lambda_config? lambda_config.ConfigOptions.FunctionName:'my-lambda'},
     {type: 'input', name: 'Region', message: 'Region:',  default: lambda_config? lambda_config.Region:"eu-west-1"},
@@ -37,7 +36,7 @@ gulp.task('configure', function(next){
     {type: 'input', name: 'MemorySize', message: 'MemorySize:',  default: lambda_config? lambda_config.ConfigOptions.MemorySize:"128"},
     {type: 'input', name: 'Timeout', message: 'Timeout:',  default: lambda_config? lambda_config.ConfigOptions.Timeout:"3"},
     {type: 'input', name: 'Runtime', message: 'Runtime:',  default: lambda_config? lambda_config.ConfigOptions.Timeout:"nodejs4.3"}
-  ], function (config_answers) {
+  ]).then( function (config_answers) {
     lambda_config = {
       Region: config_answers.Region,
       ConfigOptions: {
@@ -57,8 +56,6 @@ gulp.task('configure', function(next){
     fs.writeFileSync(__dirname + '/src/package.json', JSON.stringify(lambdaPackage, null, 4));
     fs.writeFileSync(__dirname + '/lambda_config.json', JSON.stringify(lambda_config, null, 4));
     console.log('\n',lambda_config,'\n\n',"Lambda configuration saved.".green);
-
-    next();
   });
 });
 
@@ -150,7 +147,6 @@ function buildLambdaZip(next){
   const jsFilter = filter('**/*.js', {restore:true});
   gulp.src("src/**/*")
     .pipe(jsFilter)
-    .pipe(uglify())
     .pipe(jsFilter.restore)
     .pipe(zip(lambda_config.ConfigOptions.FunctionName+".zip"))
     .pipe(data(function(data) {
