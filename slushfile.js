@@ -7,7 +7,8 @@
  */
 
 'use strict';
-require('colors');
+
+const clc      = require('cli-color');
 const gulp     = require('gulp');
 const install  = require('gulp-install');
 const replace  = require('gulp-replace');
@@ -17,7 +18,7 @@ const del      = require('del');
 const fs       = require('fs');
 const path     = require('path');
 
-gulp.task('default', function() {
+gulp.task('default', function(done) {
   try {
     var userDefaults = require('./user_defaults.json');
   } catch(err) {
@@ -43,7 +44,7 @@ gulp.task('default', function() {
       };
 
       fs.writeFile(path.join(__dirname, '/user_defaults.json'), JSON.stringify(userDefaults, null, 4), function(err) {
-        if(err) console.log(err.red);
+        if(err) console.log(clc.red(err));
       });
 
       var projectFolder = answers.project_name;
@@ -95,14 +96,14 @@ gulp.task('default', function() {
       } catch(err) {
         console.log(err);
 
-        console.log(`${'!'.red} ${answers.project_name.cyan} folder already exists!`);
+        console.log(`${clc.red('!')} ${clc.cyan(answers.project_name)} folder already exists!`);
         inquirer.prompt({ type: "confirm", name: 'delete_folder', message: 'Do you want to delete it and continue with the new project?:', default: false}, function(delete_answer){
           if (delete_answer.delete_folder){
             del.sync(answers.project_name, {force:true});
             scaffold();
           }
           else {
-            console.log(`${'!'.red} Scaffolding process aborted.`);
+            console.log(`${clc.red('!')} Scaffolding process aborted.`);
           }
         })
       }

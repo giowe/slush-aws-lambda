@@ -19,7 +19,7 @@
   "dependencies": {
     "gulp": "^3.9.0",
     "aws-sdk": "^2.2.16",
-    "colors": "^1.1.2",
+    "cli-color": "^1.1.0",
     "gulp-data": "^1.2.0",
     "gulp-filter": "^3.0.1",
     "gulp-zip": "^3.0.2",
