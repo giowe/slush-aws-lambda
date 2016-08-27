@@ -58,9 +58,16 @@ gulp.task('default', function(done) {
           fs.mkdirSync(path.join(projectFolder, folders[i]));
         }
 
+        gulp.src([
+          path.join(__dirname, '/templates/.editorconfig'),
+          path.join(__dirname, '/templates/test-payload.json')
+        ])
+          .pipe(gulp.dest(projectFolder));
+
         gulp.src(path.join(__dirname, 'templates/.template-gitignore'))
           .pipe(rename({basename:".gitignore"}))
           .pipe(gulp.dest(projectFolder));
+        
         gulp.src(path.join(__dirname, 'templates/*.js'))
           .pipe(gulp.dest(projectFolder));
 

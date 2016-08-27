@@ -137,6 +137,40 @@ gulp.task('logs', function(){
   setInterval(CwLogs.printLogs, 2000);
 });
 
+gulp.task('invoke', function(next){
+  checkConfig();
+  const lambda = new AWS.Lambda({ region: lambda_config.Region });
+
+  let payload;
+
+  try {
+    payload = JSON.stringify(require('./test-payload.json'));
+  } catch(err) {
+    payload = null;
+  }
+
+  var params = {
+    FunctionName: lambda_config.ConfigOptions.FunctionName,
+    InvocationType: 'RequestResponse',
+    LogType: 'None',
+    Payload: payload
+  };
+
+  lambda.invoke(params, function(err, data) {
+    if (err) console.log(err, err.stack);
+    else {
+      try {
+        console.log(JSON.parse(data.Payload));
+      } catch (err) {
+        console.log(data.Payload);
+      }
+    }
+
+    next();
+  });
+});
+
+
 function checkConfig(){
   if (!lambda_config) {
     console.log(clc.red('lambda_config.json'), 'not found!', '\nRun', clc.cyan('gulp configure'), 'task to set up your lambda details.');
