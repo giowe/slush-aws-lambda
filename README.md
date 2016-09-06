@@ -38,7 +38,7 @@ You can set-up all settings of your AWS Lambda right now, or later at any time b
 
 ## Usage
 All you have to do is program you function inside the **src** folder; when you are done you can run the following commands:
-* `gulp create` - wraps everything inside the src folder in a zip file (after uglifying all of the .js files) and uploads it to AWS to create your new AWS Lambda using the configuration information you set in the **lambda_config.json** file;
+* `gulp create` - wraps everything inside the src folder in a zip file and uploads it to AWS to create your new AWS Lambda using the configuration information you set in the **lambda_config.json** file;
 * `gulp update` - works exactly the same as the previous command, but on an existing AWS Lambda;
 * `gulp update-code` - same as above, but it only updates the code of your AWS Lambda without modifying the configuration;
 * `gulp update-config` - only changes your AWS Lambda configuration, but not the code;

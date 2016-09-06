@@ -22,7 +22,6 @@
     "aws-sdk": "^2.2.16",
     "cli-color": "^1.1.0",
     "gulp-data": "^1.2.0",
-    "gulp-filter": "^3.0.1",
     "gulp-zip": "^3.0.2",
     "inquirer": "^1.1.2",
     "moment": "^2.14.1"

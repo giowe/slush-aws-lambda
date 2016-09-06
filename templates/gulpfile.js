@@ -6,7 +6,6 @@ const data     = require('gulp-data');
 const fs       = require('fs');
 const path     = require('path');
 const zip      = require('gulp-zip');
-const filter   = require('gulp-filter');
 const inquirer = require('inquirer');
 const AWS      = require('aws-sdk');
 
@@ -179,10 +178,7 @@ function checkConfig(){
 }
 
 function buildLambdaZip(next){
-  const jsFilter = filter('**/*.js', {restore:true});
   gulp.src('src/**/*')
-    .pipe(jsFilter)
-    .pipe(jsFilter.restore)
     .pipe(zip(lambda_config.ConfigOptions.FunctionName+'.zip'))
     .pipe(data(function(data) {
       next(data.contents);
