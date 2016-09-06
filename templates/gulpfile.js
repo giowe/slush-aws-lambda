@@ -34,7 +34,7 @@ gulp.task('configure', function(next){
     {type: 'input', name: 'Handler', message: 'Handler:',  default: lambda_config? lambda_config.ConfigOptions.Handler:'index.handler'},
     {type: 'input', name: 'MemorySize', message: 'MemorySize:',  default: lambda_config? lambda_config.ConfigOptions.MemorySize:'128'},
     {type: 'input', name: 'Timeout', message: 'Timeout:',  default: lambda_config? lambda_config.ConfigOptions.Timeout:'3'},
-    {type: 'input', name: 'Runtime', message: 'Runtime:',  default: lambda_config? lambda_config.ConfigOptions.Timeout:'nodejs4.3'}
+    {type: 'input', name: 'Runtime', message: 'Runtime:',  default: lambda_config? lambda_config.ConfigOptions.Runtime:'nodejs4.3'}
   ]).then( function (config_answers) {
     lambda_config = {
       Region: config_answers.Region,
