@@ -4,7 +4,7 @@
   "version": "%version%",
   "description": "%description%",
   "scripts": {
-    "test": "echo \"No test specified\" && exit 1"
+    "test": "gulp invoke-local"
   },
   "author": "%author_name% <%author_email%>",
   "contributors": [{
@@ -16,12 +16,13 @@
     "url": "%repoUrl%"
   },
   "license": "%license%",
-  "main": "gulpfile.js",
+  "main": "main.js",
   "dependencies": {
-    "gulp": "^3.9.0",
     "aws-sdk": "^2.2.16",
     "cli-color": "^1.1.0",
+    "gulp": "^3.9.0",
     "gulp-data": "^1.2.0",
+    "gulp-help-doc": "^1.0.7",
     "gulp-zip": "^3.0.2",
     "inquirer": "^1.1.2",
     "moment": "^2.14.1"
