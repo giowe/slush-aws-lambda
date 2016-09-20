@@ -1,12 +1,12 @@
 'use strict';
 
 const clc      = require('cli-color');
+const zipdir   = require('zip-dir');
 const gulp     = require('gulp');
 const data     = require('gulp-data');
 const usage    = require('gulp-help-doc');
 const fs       = require('fs');
 const path     = require('path');
-const zip      = require('gulp-zip');
 const inquirer = require('inquirer');
 const AWS      = require('aws-sdk');
 
@@ -81,10 +81,11 @@ gulp.task('configure', function(next){
  *  @order {2}
  */
 gulp.task('create', function(next){
-  buildLambdaZip(function(zip){
+  zipdir(path.join(__dirname,'src'), function (err, buffer) {
+    if (err) return console.log(clc.red('FAILED'), '-', clc.red(err));
     const params = lambdaConfig.ConfigOptions;
     const lambda = new AWS.Lambda({ region: lambdaConfig.Region });
-    params.Code = { ZipFile: zip };
+    params.Code = { ZipFile: buffer };
 
     lambda.createFunction(params, function(err, data) {
       if (err){
@@ -113,11 +114,12 @@ gulp.task('update', ['update-config', 'update-code']);
  *  @order {4}
  */
 gulp.task('update-code', function(next){
-  buildLambdaZip(function(zip) {
+  zipdir(path.join(__dirname,'src'), function (err, buffer) {
+    if (err) return console.log(clc.red('FAILED'), '-', clc.red(err));
     const lambda = new AWS.Lambda({ region: lambdaConfig.Region });
     const params = {
       FunctionName: lambdaConfig.ConfigOptions.FunctionName,
-      ZipFile: zip
+      ZipFile: buffer
     };
     lambda.updateFunctionCode(params, function(err, data) {
       if (err){
@@ -229,11 +231,3 @@ gulp.task('invoke', function(next){
 gulp.task('invoke-local', function(next){
   require(path.join(__dirname, 'test-local.js'))(next);
 });
-
-function buildLambdaZip(next){
-  gulp.src('src/**/*')
-    .pipe(zip(lambdaConfig.ConfigOptions.FunctionName+'.zip'))
-    .pipe(data(function(data) {
-      next(data.contents);
-    }));
-}
