@@ -1,5 +1,6 @@
 'use strict';
-const config = require('./lambda_config');
+const path   = require('path');
+const config = require(path.join(__dirname, 'lambda-config.json'));
 const AWS    = require('aws-sdk');
 const clc    = require('cli-color');
 const moment = require('moment');
