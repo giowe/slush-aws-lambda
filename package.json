@@ -1,4 +1,4 @@
-
+{
   "name": "slush-aws-lambda",
   "description": "A slush generator to scaffold an AWS Lambda function package and upload it to AWS.",
   "version": "1.4.1",
