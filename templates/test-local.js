@@ -45,7 +45,7 @@ module.exports = function(next){
   const callback = function(err, data) {
     if (err) return _fail(err);
     _succeed(data);
-  }
+  };
 
   const handler = lambda_config.ConfigOptions.Handler.split('.');
   const lambda = require(path.join(__dirname, 'src', handler[0]))[handler[1]];
