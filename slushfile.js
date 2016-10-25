@@ -35,7 +35,7 @@ gulp.task('default', function(done) {
     {type: 'input', name: 'project_repo_url', message: 'Project repo url:'},
     {type: 'input', name: 'project_license', message: 'Project license:', default: userDefaults? userDefaults.project_license : 'MIT'}
   ]).then(
-    function (answers) {
+    (answers) => {
       userDefaults = {
         project_author_name : answers.project_author_name,
         project_author_email : answers.project_author_email,
@@ -43,7 +43,7 @@ gulp.task('default', function(done) {
         project_license : answers.project_license
       };
 
-      fs.writeFile(path.join(__dirname, '/user_defaults.json'), JSON.stringify(userDefaults, null, 4), function(err) {
+      fs.writeFile(path.join(__dirname, '/user_defaults.json'), JSON.stringify(userDefaults, null, 4), (err) => {
         if(err) console.log(clc.red(err));
       });
 
@@ -52,7 +52,7 @@ gulp.task('default', function(done) {
         'src'
       ];
 
-      function scaffold() {
+      const scaffold = () => {
         fs.mkdirSync(projectFolder);
         for (var i = 0; i < folders.length; i++) {
           fs.mkdirSync(path.join(projectFolder, folders[i]));
@@ -67,7 +67,7 @@ gulp.task('default', function(done) {
         gulp.src(path.join(__dirname, 'templates/.template-gitignore'))
           .pipe(rename({basename:".gitignore"}))
           .pipe(gulp.dest(projectFolder));
-        
+
         gulp.src(path.join(__dirname, 'templates/*.js'))
           .pipe(gulp.dest(projectFolder));
 
@@ -96,15 +96,14 @@ gulp.task('default', function(done) {
         gulp.src(path.join(__dirname, '/templates/README.MD'))
           .pipe(replace(/%name%/g, answers.project_name))
           .pipe(gulp.dest(projectFolder));
-      }
+      };
 
       try {
         scaffold();
       } catch(err) {
         console.log(err);
-
         console.log(`${clc.red('!')} ${clc.cyan(answers.project_name)} folder already exists!`);
-        inquirer.prompt({ type: "confirm", name: 'delete_folder', message: 'Do you want to delete it and continue with the new project?:', default: false}, function(delete_answer){
+        inquirer.prompt({ type: "confirm", name: 'delete_folder', message: 'Do you want to delete it and continue with the new project?:', default: false}).then( (delete_answer) => {
           if (delete_answer.delete_folder){
             del.sync(answers.project_name, {force:true});
             scaffold();

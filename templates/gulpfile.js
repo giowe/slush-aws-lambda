@@ -9,13 +9,12 @@ const fs       = require('fs');
 const path     = require('path');
 const inquirer = require('inquirer');
 const AWS      = require('aws-sdk');
+const CwLogs   = require('aws-cwlogs');
 
-let CwLogs;
 let lambdaConfig;
 
 try {
   lambdaConfig = require(path.join(__dirname, 'lambda-config.json'));
-  CwLogs = require('./cw-logs');
 } catch(err) {
   const allowedTasksWithoutConfigSet = ['configure', 'help', 'default'];
   if (process.argv[2] && allowedTasksWithoutConfigSet.indexOf(process.argv[2]) === -1) {
@@ -182,7 +181,11 @@ gulp.task('delete',function(next){
  *  @order {7}
  */
 gulp.task('logs', function(){
-  setInterval(CwLogs.printLogs, 2000);
+  CwLogs.start({
+    logGroupName:`/aws/lambda/${lambdaConfig.ConfigOptions.FunctionName}`,
+    region: lambdaConfig.Region,
+    momentTimeFormat: 'hh:mm:ss:SSS'
+  });
 });
 
 /**
