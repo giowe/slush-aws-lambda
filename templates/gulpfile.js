@@ -181,12 +181,14 @@ gulp.task('delete',function(next){
  *  @order {7}
  */
 gulp.task('logs', function(){
-  CwLogs.start({
+  const cwlogs = new CwLogs({
     logGroupName:`/aws/lambda/${lambdaConfig.ConfigOptions.FunctionName}`,
     region: lambdaConfig.Region,
     momentTimeFormat: 'hh:mm:ss:SSS',
     format: 'lambda'
   });
+
+  cwlogs.start();
 });
 
 /**
