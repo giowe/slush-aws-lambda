@@ -184,7 +184,8 @@ gulp.task('logs', function(){
   CwLogs.start({
     logGroupName:`/aws/lambda/${lambdaConfig.ConfigOptions.FunctionName}`,
     region: lambdaConfig.Region,
-    momentTimeFormat: 'hh:mm:ss:SSS'
+    momentTimeFormat: 'hh:mm:ss:SSS',
+    format: 'lambda'
   });
 });
 
