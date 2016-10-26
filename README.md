@@ -37,7 +37,7 @@ gulp configure
 You can set-up all settings of your AWS Lambda right now, or later at any time by calling this command again, or directly modifying the **lambda-config.json** and the **package.json** in lambda src folder
 
 ## Usage
-All you have to do is program you function inside the **src** folder; when you are done you can run the following commands:
+All you have to do is to program your function inside the **src** folder; when you are done you can run the following commands:
 * `gulp` || `gulp help` - List all gulp tasks and their descriptions;
 * `gulp configure` - Set-up all settings of your AWS Lambda (repetita iuvant);
 * `gulp create` - wraps everything inside the src folder in a zip file and uploads it to AWS to create your new AWS Lambda using the configuration information you set in the **lambda-config.json** file;
