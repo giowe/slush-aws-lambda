@@ -5,6 +5,7 @@ const zipdir   = require('zip-dir');
 const gulp     = require('gulp');
 const data     = require('gulp-data');
 const usage    = require('gulp-help-doc');
+const install  = require('gulp-install');
 const fs       = require('fs');
 const path     = require('path');
 const inquirer = require('inquirer');
