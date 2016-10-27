@@ -4,7 +4,7 @@
   "version": "%version%",
   "description": "%description%",
   "scripts": {
-    "postinstall": "npm install --prefix ./src",
+    "postinstall": "gulp install",
     "test": "gulp invoke-local"
   },
   "author": "%author_name% <%author_email%>",
