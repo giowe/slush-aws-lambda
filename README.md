@@ -2,11 +2,18 @@
 <div>
 	<a href="https://www.npmjs.com/package/slush-aws-lambda"><img src='http://img.shields.io/npm/v/slush-aws-lambda.svg?style=flat'></a>
 	<a href="https://www.npmjs.com/package/slush-aws-lambda"><img src='https://img.shields.io/npm/dm/slush-aws-lambda.svg?style=flat-square'></a>
-	<a href="https://david-dm.org/giowe/slush-aws-lambda"><img src='https://david-dm.org/giowe/slush-aws-lambda.svg'></a>
+
+<a href="https://david-dm.org/giowe/slush-aws-lambda"><img src='https://david-dm.org/giowe/slush-aws-lambda.svg'></a>
 	<a href="https://www.youtube.com/watch?v=Sagg08DrO5U"><img src='http://img.shields.io/badge/gandalf-approved-61C6FF.svg'></a>
 </div>
 
 A slush generator to scaffold an AWS Lambda function package and upload it to AWS.
+
+This generator helps you to:
+* scaffold your AWS Lambda solution;
+* create / update / delete the AWS Lambda on your AWS account;
+* invoke locally your AWS Lambda with a test payload;
+* realtime log into your console all AWS CloudWatch Logs related to your AWS Lambda execution;
 
 ## Installation
 First of all you have to globally install [Slush](http://slushjs.github.io/#/), the streaming scaffolding system.
