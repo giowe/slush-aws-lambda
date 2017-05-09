@@ -19,7 +19,7 @@
   "license": "%license%",
   "main": "main.js",
   "dependencies": {
-    "aws-cwlogs": "^2.1.1",
+    "aws-cwlogs": "^2.2.0",
     "aws-sdk": "^2.2.16",
     "cli-color": "^1.1.0",
     "gulp": "^3.9.0",
