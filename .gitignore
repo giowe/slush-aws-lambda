@@ -1,4 +1,4 @@
-node_modules/**/*
+node_modules/
 .idea/
 test-lambda/
 user_defaults.json
