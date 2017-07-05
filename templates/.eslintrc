@@ -18,7 +18,7 @@
     "no-new-symbol": "error",
     "no-undef": ["error"],
     "no-unused-vars": ["warn"],
-    "no-console": ["warn"],
+    "no-console": 0,
     "object-curly-spacing": ["error", "always"],
     "object-shorthand": "error",
     "prefer-const": 2,

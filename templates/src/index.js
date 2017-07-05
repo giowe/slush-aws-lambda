@@ -1,5 +1,5 @@
-var AWS = require('aws-sdk');
+const AWS = require('aws-sdk');
 
 exports.handler = (event, context, callback) => {
-    callback(null, event);
+  callback(null, event);
 };

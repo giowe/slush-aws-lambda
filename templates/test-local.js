@@ -14,11 +14,11 @@ module.exports = function(next){
   try {
     payload = require('./test-payload.json');
   } catch (err) {
-    return console.log('WARNING! "test-payload.json" not found!')
+    return console.log('WARNING! "test-payload.json" not found!');
   }
 
   const _fail = function(err) {
-    console.log({errorMessage: err});
+    console.log({ errorMessage: err });
     next();
     process.exit();
   };
