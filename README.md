@@ -1,5 +1,5 @@
 # slush-aws-lambda
-[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Dependency Status][dependencies-image]][npm-url] [![Gandalf Status][gandalf-image]][gandalf-url]
+[![NPM version][npm-image]][npm-url] [![Downloads][downloads-image]][npm-url] [![Dependency Status][dependencies-image]][dependencies-url] [![Gandalf Status][gandalf-image]][gandalf-url]
 
 [npm-url]: https://www.npmjs.com/package/slush-aws-lambda
 [npm-image]: http://img.shields.io/npm/v/slush-aws-lambda.svg?style=flat
