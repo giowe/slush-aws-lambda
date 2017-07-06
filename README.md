@@ -4,6 +4,7 @@
 [npm-url]: https://www.npmjs.com/package/slush-aws-lambda
 [npm-image]: http://img.shields.io/npm/v/slush-aws-lambda.svg?style=flat
 [downloads-image]: https://img.shields.io/npm/dm/slush-aws-lambda.svg?style=flat-square
+[dependencies-url]: href="https://david-dm.org/giowe/slush-aws-lambda
 [dependencies-image]: https://david-dm.org/giowe/slush-aws-lambda.svg
 [gandalf-url]: https://www.youtube.com/watch?v=Sagg08DrO5U
 [gandalf-image]: http://img.shields.io/badge/gandalf-approved-61C6FF.svg
