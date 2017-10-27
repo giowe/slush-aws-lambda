@@ -3,3 +3,4 @@ node_modules/
 test-lambda/
 user_defaults.json
 *.log
+package-lock.json.*
