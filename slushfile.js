@@ -114,5 +114,6 @@ gulp.task('default', (done) => {
       }
 
       done();
-    });
+    })
+    .catch(console.log);
 });
