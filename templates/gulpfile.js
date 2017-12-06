@@ -21,7 +21,7 @@ try {
   }
 }
 
-let credentials = {};
+let credentials;
 try {
   credentials = require(path.join(__dirname, '.credentials.json'));
 } catch(ignore) {
@@ -49,6 +49,7 @@ gulp.task('credentials', () => {
     { type: 'input', name: 'secretAccessKey', message: `AWS Secret Access Key [${obfuscate(credentials.secretAccessKey)}]:` }
   ])
     .then(({ accessKeyId, secretAccessKey }) => {
+      if (!credentials) credentials = {};
       if (accessKeyId) credentials.accessKeyId = accessKeyId;
       if (secretAccessKey) credentials.secretAccessKey = secretAccessKey;
 
@@ -118,7 +119,7 @@ gulp.task('create', next => {
   zipdir(path.join(__dirname, 'src'), (err, buffer) => {
     if (err) return console.log(clc.red('FAILED'), '-', clc.red(err));
     const params = lambdaConfig.ConfigOptions;
-    const lambda = new AWS.Lambda({ region: lambdaConfig.Region });
+    const lambda = new AWS.Lambda({ credentials, region: lambdaConfig.Region });
     params.Code = { ZipFile: buffer };
 
     lambda.createFunction(params, (err, data) => {
@@ -150,7 +151,7 @@ gulp.task('update', ['update-config', 'update-code']);
 gulp.task('update-code', next => {
   zipdir(path.join(__dirname, 'src'), (err, buffer) => {
     if (err) return console.log(clc.red('FAILED'), '-', clc.red(err));
-    const lambda = new AWS.Lambda({ region: lambdaConfig.Region });
+    const lambda = new AWS.Lambda({ credentials, region: lambdaConfig.Region });
     const params = {
       FunctionName: lambdaConfig.ConfigOptions.FunctionName,
       ZipFile: buffer
@@ -176,7 +177,7 @@ gulp.task('update-code', next => {
  *  @order {7}
  */
 gulp.task('update-config', next => {
-  const lambda = new AWS.Lambda({ region: lambdaConfig.Region });
+  const lambda = new AWS.Lambda({ credentials, region: lambdaConfig.Region });
 
   lambda.updateFunctionConfiguration(lambdaConfig.ConfigOptions, (err, data) => {
     if (err){
@@ -197,7 +198,7 @@ gulp.task('update-config', next => {
  *  @order {8}
  */
 gulp.task('delete', next => {
-  const lambda = new AWS.Lambda({ region: lambdaConfig.Region });
+  const lambda = new AWS.Lambda({ credentials, region: lambdaConfig.Region });
   lambda.deleteFunction({ FunctionName: lambdaConfig.ConfigOptions.FunctionName }, err => {
     if (err){
       console.log(clc.red('FAILED'), '-', clc.red(err.message));
@@ -233,7 +234,7 @@ gulp.task('logs', () => {
  * @order {10}
  */
 gulp.task('invoke', next => {
-  const lambda = new AWS.Lambda({ region: lambdaConfig.Region });
+  const lambda = new AWS.Lambda({ credentials, region: lambdaConfig.Region });
 
   let payload;
   try {

@@ -36,19 +36,29 @@ Now you must provide some info about the project.
 You can always insert this information manually later by modifying the solution package.json (both in the project and in the lambda src folder)
 
 ## Configuration
-To use the slush-aws-lambda solution it's important that you have properly installed the [aws-cli](http://docs.aws.amazon.com/cli/latest/userguide/installing.html) and
-configured it with your credentials.
+To use the slush-aws-lambda solution you can chose between one of this 2 options:
+ 
+1. Run the command
+   ```
+   gulp credentials
+   ```
+   to specify a set of project specific AWS credentials that are saved in the project folder and automatically ignored
+   in the .gitignore file.
+
+2. install the [aws-cli](http://docs.aws.amazon.com/cli/latest/userguide/installing.html) and run the command `aws configure`
+
 
 Then, from the folder of your project, run the command
 ```
 gulp configure
 ```
-You can set-up all settings of your AWS Lambda right now, or later at any time by calling this command again, or directly modifying the **lambda-config.json** and the **package.json** in lambda src folder
+You can set-up all the configurations of your AWS Lambda right now, or later at any time by calling this command again, or directly modifying the **lambda-config.json** and the **package.json** in lambda src folder
 
 ## Usage
 All you have to do is to program your function inside the **src** folder; when you are done you can run the following commands:
 * `gulp` || `gulp help` - List all gulp tasks and their descriptions;
-* `gulp configure` - Set-up all settings of your AWS Lambda;
+* `gulp credentials` - Set-up AWS project specific credentials;
+* `gulp configure` - Set-up all AWS Lambda configurations;
 * `gulp install` - Installs npm packages inside the src folder;
 * `gulp create` - wraps everything inside the src folder in a zip file and uploads it to AWS to create your new AWS Lambda using the configuration information you set in the **lambda-config.json** file;
 * `gulp update` - works exactly the same as the previous command, but on an existing AWS Lambda;
