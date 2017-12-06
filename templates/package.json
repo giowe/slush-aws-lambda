@@ -22,14 +22,16 @@
   "main": "main.js",
   "dependencies": {
     "aws-cwlogs": "^2.5.0",
-    "aws-sdk": "^2.141.0",
     "cli-color": "^1.2.0",
-    "eslint": "^4.9.0",
     "gulp": "^3.9.1",
     "gulp-help-doc": "^1.1.0",
     "gulp-install": "^1.1.0",
-    "inquirer": "^3.3.0",
-    "moment": "^2.19.1",
+    "inquirer": "^4.0.1",
+    "moment": "^2.19.3",
     "zip-dir": "^1.0.2"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.164.0",
+    "eslint": "^4.12.1"
   }
 }

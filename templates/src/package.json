@@ -1,7 +1,7 @@
 {
   "private": true,
-  "name": "",
-  "description": "",
+  "name": "%name%",
+  "description": "%description%",
   "author": "%author_name% <%author_email%>",
   "contributors": [{
     "name": "%author_name%",
