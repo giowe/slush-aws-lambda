@@ -43,13 +43,13 @@ gulp.task('default', ['help']);
  * @order {1}
  */
 gulp.task('credentials', () => {
+  if (!credentials) credentials = {};
   const obfuscate = (str) => typeof str === 'string' ? str.split('').map((char, i) => i < str.length - 4 ? '*' : char).join('') : '';
   return inquirer.prompt([
     { type: 'input', name: 'accessKeyId', message: `AWS Access Key ID [${obfuscate(credentials.accessKeyId)}]:` },
     { type: 'input', name: 'secretAccessKey', message: `AWS Secret Access Key [${obfuscate(credentials.secretAccessKey)}]:` }
   ])
     .then(({ accessKeyId, secretAccessKey }) => {
-      if (!credentials) credentials = {};
       if (accessKeyId) credentials.accessKeyId = accessKeyId;
       if (secretAccessKey) credentials.secretAccessKey = secretAccessKey;
 

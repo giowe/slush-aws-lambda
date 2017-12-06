@@ -1,21 +1,12 @@
-/*
- * slush-aws-lambda
- * https://github.com/giowe/slush-aws-lambda
- *
- * Copyright (c) 2017, Giovanni Bruno
- * Licensed under the MIT license.
- */
-'use strict';
-
-const clc      = require('cli-color');
-const gulp     = require('gulp');
-const install  = require('gulp-install');
-const replace  = require('gulp-replace');
-const rename   = require('gulp-rename');
+const clc = require('cli-color');
+const gulp = require('gulp');
+const install = require('gulp-install');
+const replace = require('gulp-replace');
+const rename = require('gulp-rename');
 const inquirer = require('inquirer');
-const del      = require('del');
-const fs       = require('fs');
-const path     = require('path');
+const del = require('del');
+const fs = require('fs');
+const path = require('path');
 
 gulp.task('default', (done) => {
   let userDefaults;
