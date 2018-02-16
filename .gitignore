@@ -4,3 +4,4 @@ test-lambda/
 user_defaults.json
 *.log
 package-lock.json.*
+.credentials.json
