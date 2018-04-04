@@ -1,7 +1,7 @@
 {
   "name": "slush-aws-lambda",
   "description": "A slush generator to scaffold an AWS Lambda function package and upload it to AWS.",
-  "version": "1.9.3",
+  "version": "1.10.0",
   "homepage": "https://github.com/giowe/slush-aws-lambda",
   "author": "Giovanni Bruno <giovanni.bruno@soluzionifutura.it>",
   "contributors": [
@@ -28,13 +28,13 @@
   "dependencies": {
     "cli-color": "^1.2.0",
     "del": "^3.0.0",
-    "eslint": "^4.12.1",
+    "eslint": "^4.19.1",
     "gulp": "^3.9.1",
     "gulp-install": "^1.1.0",
     "gulp-rename": "^1.2.2",
     "gulp-replace": "^0.6.1",
-    "inquirer": "4.0.1",
-    "moment": "^2.19.3"
+    "inquirer": "5.2.0",
+    "moment": "^2.22.0"
   },
   "keywords": [
     "slushgenerator",
