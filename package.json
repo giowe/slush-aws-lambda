@@ -40,7 +40,7 @@
     "slushgenerator",
     "aws",
     "lambda",
-    "gulp"
+    "serverless"
   ],
   "license": "MIT"
 }
