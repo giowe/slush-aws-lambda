@@ -12,7 +12,7 @@ const CwLogs = require('aws-cwlogs');
 let lambdaConfig;
 
 try {
-  lambdaConfig = require(path.join(__dirname, 'lambda-config.json'));
+  lambdaConfig = require(path.join(__dirname, 'lambda-config.js'));
 } catch(err) {
   const allowedTasksWithoutConfigSet = ['configure', 'help', 'default'];
   if (process.argv[2] && allowedTasksWithoutConfigSet.indexOf(process.argv[2]) === -1) {
@@ -74,25 +74,28 @@ gulp.task('configure', next => {
     { type: 'input', name: 'Timeout', message: 'Timeout:',  default: lambdaConfig? lambdaConfig.ConfigOptions.Timeout:'3' },
     { type: 'input', name: 'Runtime', message: 'Runtime:',  default: lambdaConfig? lambdaConfig.ConfigOptions.Runtime:'nodejs8.10' }
   ]).then(config_answers => {
-    lambdaConfig = {
-      Region: config_answers.Region,
-      ConfigOptions: {
-        FunctionName: config_answers.FunctionName,
-        Description: config_answers.Description,
-        Role: config_answers.Role,
-        Handler: config_answers.Handler,
-        MemorySize: config_answers.MemorySize,
-        Timeout: config_answers.Timeout,
-        Runtime: config_answers.Runtime
-      }
-    };
-
+    const lambdaConfigFile =
+`module.exports = {
+  Region: '${config_answers.Region}',
+  ConfigOptions: {
+    FunctionName: '${config_answers.FunctionName}',
+    Description: '${config_answers.Description}',
+    Role: '${config_answers.Role}',
+    Handler: '${config_answers.Handler}',
+    MemorySize: ${config_answers.MemorySize},
+    Timeout: ${config_answers.Timeout},
+    Runtime: '${config_answers.Runtime}',
+    Environment: {
+      Variables: {}
+    }
+  }
+};`;
     const lambdaPackage = require(path.join(__dirname, 'src/package.json'));
     lambdaPackage.name = config_answers.FunctionName;
     lambdaPackage.description = config_answers.Description;
     fs.writeFileSync(path.join(__dirname, '/src/package.json'), JSON.stringify(lambdaPackage, null, 2));
-    fs.writeFileSync(path.join(__dirname, '/lambda-config.json'), JSON.stringify(lambdaConfig, null, 2));
-    console.log('\n', lambdaConfig, '\n\n', clc.green('Lambda configuration saved'));
+    fs.writeFileSync(path.join(__dirname, '/lambda-config.js'), lambdaConfigFile);
+    console.log(clc.green('Lambda configuration saved'));
     next();
   })
     .catch(console.log);

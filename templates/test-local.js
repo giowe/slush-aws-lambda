@@ -1,13 +1,14 @@
 const clc = require('cli-color');
 const path = require('path');
 
-module.exports = function(next){
-  let lambda_config;
+module.exports = next => {
+  let lambdaConfig;
   try {
-    lambda_config = require(path.join(__dirname, 'lambda-config.json'));
+    lambdaConfig = require(path.join(__dirname, 'lambda-config.js'));
   } catch (err) {
     return console.log('WARNING! lambda config not found, run command', clc.cyan('gulp configure'));
   }
+  const { Handler, Environment } = lambdaConfig.ConfigOptions;
 
   let payload;
   try {
@@ -16,37 +17,36 @@ module.exports = function(next){
     return console.log('WARNING! "test-payload.json" not found!');
   }
 
-  const fail = function(err) {
+  const fail = err => {
     console.log({ errorMessage: err });
     next();
     process.exit();
   };
 
-  const succeed = function(data) {
+  const succeed = data => {
     if(data) console.log(data);
     next();
     process.exit();
   };
 
-  const done = function(err, data) {
+  const done = (err, data) => {
     if (err) fail(err);
     else succeed(data);
     next();
     process.exit();
   };
 
-  const context = {
-    fail,
-    succeed,
-    done
-  };
+  const context = { fail, succeed, done };
 
-  const callback = function(err, data) {
+  const callback = (err, data) => {
     if (err) return fail(err);
     succeed(data);
   };
 
-  const handler = lambda_config.ConfigOptions.Handler.split('.');
+  const handler = Handler.split('.');
+  if (Environment && Environment.Variables) {
+    Object.assign(process.env, Environment.Variables);
+  }
   const lambda = require(path.join(__dirname, 'src', handler[0]))[handler[1]];
 
   lambda(payload, context, callback);
