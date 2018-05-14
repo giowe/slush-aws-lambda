@@ -8,18 +8,26 @@ const path = require('path');
 const inquirer = require('inquirer');
 const AWS = require('aws-sdk');
 const CwLogs = require('aws-cwlogs');
+const { env = 'staging' } = require('simple-argv');
 
-let lambdaConfig;
-
-try {
-  lambdaConfig = require(path.join(__dirname, 'lambda-config.js'));
-} catch(err) {
-  const allowedTasksWithoutConfigSet = ['configure', 'help', 'default'];
-  if (process.argv[2] && allowedTasksWithoutConfigSet.indexOf(process.argv[2]) === -1) {
-    console.log('WARNING! lambda config not found, run command', clc.cyan('gulp configure'));
-    process.exit();
-  }
-}
+const getLambdaConfig = (() => {
+  let lambdaConfig;
+  return () => {
+    if (!lambdaConfig) {
+      try {
+        lambdaConfig = require(path.join(__dirname, 'lambda-config.js'))(env);
+        console.log(`Using ${env === 'production' ? clc.yellow(env) : clc.green(env)} lambda-config.js`);
+      } catch (err) {
+        if (err.message.indexOf('Cannot find module') !== -1) {
+          throw new Error(`WARNING! lambda config not found, run command ${clc.cyan('gulp configure')}`);
+        } else {
+          throw err;
+        }
+      }
+    }
+    return lambdaConfig;
+  };
+})();
 
 let credentials;
 try {
@@ -64,8 +72,13 @@ gulp.task('credentials', () => {
  * @order {2}
  */
 gulp.task('configure', next => {
+  let lambdaConfig;
+  try {
+    lambdaConfig = getLambdaConfig();
+  } catch(_) {}
+
   inquirer.prompt([
-    { type: 'input', name: 'FunctionName', message: 'Function name:', default: lambdaConfig? lambdaConfig.ConfigOptions.FunctionName:'my-lambda' },
+    { type: 'input', name: 'FunctionName', message: 'Function name:', default: lambdaConfig? lambdaConfig.ConfigOptions.FunctionName:'my-lambda-${env}' },
     { type: 'input', name: 'Region', message: 'Region:',  default: lambdaConfig? lambdaConfig.Region:'eu-west-1' },
     { type: 'input', name: 'Description', message: 'Description:',  default: lambdaConfig? lambdaConfig.ConfigOptions.Description:null },
     { type: 'input', name: 'Role', message: 'Role arn:',  default: lambdaConfig? lambdaConfig.ConfigOptions.Role:null },
@@ -75,10 +88,10 @@ gulp.task('configure', next => {
     { type: 'input', name: 'Runtime', message: 'Runtime:',  default: lambdaConfig? lambdaConfig.ConfigOptions.Runtime:'nodejs8.10' }
   ]).then(config_answers => {
     const lambdaConfigFile =
-`module.exports = {
+`module.exports = env => ({
   Region: '${config_answers.Region}',
   ConfigOptions: {
-    FunctionName: '${config_answers.FunctionName}',
+    FunctionName: \`${config_answers.FunctionName}\`,
     Description: '${config_answers.Description}',
     Role: '${config_answers.Role}',
     Handler: '${config_answers.Handler}',
@@ -86,10 +99,12 @@ gulp.task('configure', next => {
     Timeout: ${config_answers.Timeout},
     Runtime: '${config_answers.Runtime}',
     Environment: {
-      Variables: {}
+      Variables: {
+        NODE_ENV: env
+      }
     }
   }
-};`;
+});`;
     const lambdaPackage = require(path.join(__dirname, 'src/package.json'));
     lambdaPackage.name = config_answers.FunctionName;
     lambdaPackage.description = config_answers.Description;
@@ -119,11 +134,13 @@ gulp.task('install', () => {
  *  @order {4}
  */
 gulp.task('create', next => {
-  zipdir(path.join(__dirname, 'src'), (err, buffer) => {
+  zipdir(path.join(__dirname, 'src'), (err, ZipFile) => {
+    const { ConfigOptions, Region: region } = getLambdaConfig();
+
     if (err) return console.log(clc.red('FAILED'), '-', clc.red(err));
-    const params = lambdaConfig.ConfigOptions;
-    const lambda = new AWS.Lambda({ credentials, region: lambdaConfig.Region });
-    params.Code = { ZipFile: buffer };
+    const params = ConfigOptions;
+    const lambda = new AWS.Lambda({ credentials, region });
+    params.Code = { ZipFile };
 
     lambda.createFunction(params, (err, data) => {
       if (err){
@@ -152,24 +169,20 @@ gulp.task('update', ['update-config', 'update-code']);
  *  @order {6}
  */
 gulp.task('update-code', next => {
-  zipdir(path.join(__dirname, 'src'), (err, buffer) => {
+  zipdir(path.join(__dirname, 'src'), (err, ZipFile) => {
     if (err) return console.log(clc.red('FAILED'), '-', clc.red(err));
-    const lambda = new AWS.Lambda({ credentials, region: lambdaConfig.Region });
-    const params = {
-      FunctionName: lambdaConfig.ConfigOptions.FunctionName,
-      ZipFile: buffer
-    };
-    lambda.updateFunctionCode(params, (err, data) => {
-      if (err){
-        console.log(clc.red('FAILED'), '-', clc.red(err.message));
-        console.log(err);
-      }
-      else {
+    const { Region: region, ConfigOptions: { FunctionName } } = getLambdaConfig();
+    const lambda = new AWS.Lambda({ credentials, region });
+    lambda.updateFunctionCode({ FunctionName, ZipFile }).promise()
+      .then(data => {
         console.log(clc.green('SUCCESS'), '- lambda', clc.cyan(data.FunctionName), 'code updated');
         console.log(data);
-      }
-      next();
-    });
+        next();
+      })
+      .catch(err => {
+        console.log(clc.red('FAILED'), '-', clc.red(err.message));
+        next(err);
+      });
   });
 });
 
@@ -180,19 +193,19 @@ gulp.task('update-code', next => {
  *  @order {7}
  */
 gulp.task('update-config', next => {
-  const lambda = new AWS.Lambda({ credentials, region: lambdaConfig.Region });
+  const { Region: region, ConfigOptions } = getLambdaConfig();
+  const lambda = new AWS.Lambda({ credentials, region });
 
-  lambda.updateFunctionConfiguration(lambdaConfig.ConfigOptions, (err, data) => {
-    if (err){
-      console.log(clc.red('FAILED'), '-', clc.red(err.message));
-      console.log(err);
-    }
-    else {
+  lambda.updateFunctionConfiguration(ConfigOptions).promise()
+    .then(data => {
       console.log(clc.green('SUCCESS'), '- lambda', clc.cyan(data.FunctionName), 'config updated');
       console.log(data);
-    }
-    next();
-  });
+      next();
+    })
+    .catch(err => {
+      console.log(clc.red('FAILED'), '-', clc.red(err.message));
+      next(err);
+    });
 });
 
 /**
@@ -201,16 +214,17 @@ gulp.task('update-config', next => {
  *  @order {8}
  */
 gulp.task('delete', next => {
-  const lambda = new AWS.Lambda({ credentials, region: lambdaConfig.Region });
-  lambda.deleteFunction({ FunctionName: lambdaConfig.ConfigOptions.FunctionName }, err => {
-    if (err){
+  const { Region: region, ConfigOptions: { FunctionName } } = getLambdaConfig();
+  const lambda = new AWS.Lambda({ credentials, region });
+  lambda.deleteFunction({ FunctionName }).promise()
+    .then(() => {
+      console.log(clc.green('SUCCESS'), '- lambda deleted');
+      next();
+    })
+    .catch(err => {
       console.log(clc.red('FAILED'), '-', clc.red(err.message));
-      console.log(err);
-    }
-    else console.log(clc.green('SUCCESS'), '- lambda deleted');
-
-    next();
-  });
+      next(err);
+    });
 });
 
 /**
@@ -220,8 +234,9 @@ gulp.task('delete', next => {
  *  @order {9}
  */
 gulp.task('logs', () => {
+  const { ConfigOptions: { FunctionName } } = getLambdaConfig();
   const cwlogs = new CwLogs({
-    logGroupName:`/aws/lambda/${lambdaConfig.ConfigOptions.FunctionName}`,
+    logGroupName:`/aws/lambda/${FunctionName}`,
     region: lambdaConfig.Region,
     momentTimeFormat: 'hh:mm:ss:SSS',
     logFormat: 'lambda',
@@ -232,44 +247,45 @@ gulp.task('logs', () => {
 });
 
 /**
- * Invokes the Lambda function passing test-payload.json as
+ * Invokes the Lambda function passing test-payload.js as
  * payload and printing the response to the console;
  * @task {invoke}
  * @order {10}
  */
 gulp.task('invoke', next => {
-  const lambda = new AWS.Lambda({ credentials, region: lambdaConfig.Region });
+  const { Region: region, ConfigOptions: { FunctionName } } = getLambdaConfig();
 
-  let payload;
+  const lambda = new AWS.Lambda({ credentials, region });
+
+  let Payload;
   try {
-    payload = JSON.stringify(require('./test-payload.json'));
+    Payload = JSON.stringify(require('./test-payload.js'));
   } catch(err) {
-    payload = null;
+    return next(err);
   }
-
-  const params = {
-    FunctionName: lambdaConfig.ConfigOptions.FunctionName,
+  lambda.invoke({
+    FunctionName,
     InvocationType: 'RequestResponse',
     LogType: 'None',
-    Payload: payload
-  };
-
-  lambda.invoke(params, (err, data) => {
-    if (err) console.log(err, err.stack);
-    else {
+    Payload
+  }).promise()
+    .then(data => {
+      console.log(clc.green('SUCCESS'), '- lambda invocation done');
       try {
         console.log(JSON.parse(data.Payload));
-      } catch (err) {
+      } catch (_) {
         console.log(data.Payload);
       }
-    }
-
-    next();
-  });
+      next();
+    })
+    .catch(err => {
+      console.log(clc.red('FAILED'), '-', clc.red(err.message));
+      next(err);
+    });
 });
 
 /**
- * Invokes the Lambda function LOCALLY passing test-payload.json
+ * Invokes the Lambda function LOCALLY passing test-payload.js
  * as payload and printing the response to the console;
  * @task {invoke-local}
  * @order {11}

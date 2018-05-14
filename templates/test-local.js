@@ -1,25 +1,35 @@
 const clc = require('cli-color');
 const path = require('path');
+const { env = 'staging' } = require('simple-argv');
+
 
 module.exports = next => {
   let lambdaConfig;
   try {
-    lambdaConfig = require(path.join(__dirname, 'lambda-config.js'));
+    lambdaConfig = require(path.join(__dirname, 'lambda-config.js'))(env);
   } catch (err) {
-    return console.log('WARNING! lambda config not found, run command', clc.cyan('gulp configure'));
+    if (err.message.indexOf('Cannot find module') !== -1) {
+      throw new Error(`WARNING! lambda config not found, run command ${clc.cyan('gulp configure')}`);
+    } else {
+      throw err;
+    }
   }
   const { Handler, Environment } = lambdaConfig.ConfigOptions;
 
   let payload;
   try {
-    payload = require('./test-payload.json');
+    payload = require('./test-payload.js');
   } catch (err) {
-    return console.log('WARNING! "test-payload.json" not found!');
+    if (err.message.indexOf('Cannot find module') !== -1) {
+      throw new Error('WARNING! "test-payload.js" not found!');
+    } else {
+      throw err;
+    }
   }
 
   const fail = err => {
     console.log({ errorMessage: err });
-    next();
+    next(err);
     process.exit();
   };
 
@@ -36,8 +46,6 @@ module.exports = next => {
     process.exit();
   };
 
-  const context = { fail, succeed, done };
-
   const callback = (err, data) => {
     if (err) return fail(err);
     succeed(data);
@@ -49,5 +57,5 @@ module.exports = next => {
   }
   const lambda = require(path.join(__dirname, 'src', handler[0]))[handler[1]];
 
-  lambda(payload, context, callback);
+  lambda(payload, { fail, succeed, done }, callback);
 };
