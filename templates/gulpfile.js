@@ -234,10 +234,10 @@ gulp.task('delete', next => {
  *  @order {9}
  */
 gulp.task('logs', () => {
-  const { ConfigOptions: { FunctionName } } = getLambdaConfig();
+  const { ConfigOptions: { FunctionName }, Region: region } = getLambdaConfig();
   const cwlogs = new CwLogs({
     logGroupName:`/aws/lambda/${FunctionName}`,
-    region: lambdaConfig.Region,
+    region,
     momentTimeFormat: 'hh:mm:ss:SSS',
     logFormat: 'lambda',
     credentials
