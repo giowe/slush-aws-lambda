@@ -28,7 +28,6 @@
   "dependencies": {
     "cli-color": "^1.2.0",
     "del": "^3.0.0",
-    "eslint": "^4.19.1",
     "gulp": "^3.9.1",
     "gulp-install": "^1.1.0",
     "gulp-rename": "^1.2.2",
@@ -43,5 +42,9 @@
     "lambda",
     "serverless"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@soluzioni-futura/eslint-config-soluzioni-futura": "^1.0.1",
+    "eslint": "^4.19.1"
+  }
 }
