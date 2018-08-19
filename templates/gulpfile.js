@@ -1,5 +1,6 @@
+const { promisify } = require("util")
 const clc = require("cli-color")
-const zipdir = require("zip-dir")
+const zipdir = promisify(require("zip-dir"))
 const gulp = require("gulp")
 const usage = require("gulp-help-doc")
 const install = require("gulp-install")
@@ -8,26 +9,53 @@ const path = require("path")
 const inquirer = require("inquirer")
 const AWS = require("aws-sdk")
 const CwLogs = require("aws-cwlogs")
-const { env = "staging" } = require("simple-argv")
+const { env = "staging", debug } = require("simple-argv")
+const {
+  iam: {
+    role: { create: createRole, delete: deleteRole, basicAssumeRolePolicy },
+    policy: { create: createPolicy, attachRolePolicy, basicLambdaPolicy, detachRolePolicy, delete: deletePolicy, getPolicyArn, updateDocument: updatePolicyDocument }
+  },
+  lambda: {
+    create: createLambda,
+    delete: deleteLambda,
+    updateConfiguration: updateLambdaConfiguration
+  }
+} = require("aws-valkyrie-utils")
+const success = (...args) => console.log("[" + clc.green("SUCCESS") + "]", ...args)
+const error = err => console.error("[" + clc.red("ERROR") + "]", err.message, debug ? err.stack : "")
 
-const getLambdaConfig = (() => {
-  let lambdaConfig
-  return () => {
-    if (!lambdaConfig) {
-      try {
-        lambdaConfig = require(path.join(__dirname, "lambda-config.js"))(env)
-        console.log(`Using ${env === "production" ? clc.yellow(env) : clc.green(env)} lambda-config.js`)
-      } catch (err) {
-        if (err.message.indexOf("Cannot find module") !== -1) {
-          throw new Error(`WARNING! lambda config not found, run command ${clc.cyan("gulp configure")}`)
-        } else {
-          throw err
-        }
+let lambdaConfig
+const getLambdaConfig = () => {
+  if (!lambdaConfig) {
+    try {
+      lambdaConfig = require(path.join(__dirname, "lambda-config.js"))(env)
+      console.log(`Using ${env === "production" ? clc.yellow(env) : clc.green(env)} lambda-config.js`)
+    } catch (err) {
+      if (err.message.indexOf("Cannot find module") !== -1) {
+        throw new Error(`WARNING! lambda config not found, run command ${clc.cyan("gulp configure")}`)
+      } else {
+        throw err
       }
     }
-    return lambdaConfig
   }
-})()
+  return lambdaConfig
+}
+let lambdaPolicy
+const getLambdaPolicy = () => {
+  if (!lambdaPolicy) {
+    try {
+      lambdaPolicy = require(path.join(__dirname, "lambda-policy.js"))(env)
+      console.log(`Using ${env === "production" ? clc.yellow(env) : clc.green(env)} lambda-policy.js`)
+    } catch (err) {
+      if (err.message.indexOf("Cannot find module") !== -1) {
+        throw new Error(`WARNING! lambda policy not found, run command ${clc.cyan("gulp configure")}`)
+      } else {
+        throw err
+      }
+    }
+  }
+  return lambdaPolicy
+}
 
 let credentials
 try {
@@ -63,7 +91,7 @@ gulp.task("credentials", () => {
 
       fs.writeFileSync(path.join(__dirname, ".credentials.json"), JSON.stringify(credentials, null, 2))
     })
-    .catch(console.log)
+    .catch(error)
 })
 
 /**
@@ -73,47 +101,59 @@ gulp.task("credentials", () => {
  */
 gulp.task("configure", next => {
   let lambdaConfig
+  let lambdaPolicy
   try {
-    lambdaConfig = getLambdaConfig()
+    lambdaConfig = require(path.join(__dirname, "lambda-config.js"))("${env}")
+    lambdaPolicy = require(path.join(__dirname, "lambda-policy.js"))("${env}")
   } catch(_) {}
 
   inquirer.prompt([
     { type: "input", name: "FunctionName", message: "Function name:", default: lambdaConfig ? lambdaConfig.ConfigOptions.FunctionName : "my-lambda-${env}" },
     { type: "input", name: "Region", message: "Region:",  default: lambdaConfig ? lambdaConfig.Region : "eu-west-1" },
     { type: "input", name: "Description", message: "Description:",  default: lambdaConfig ? lambdaConfig.ConfigOptions.Description : null },
-    { type: "input", name: "Role", message: "Role arn:",  default: lambdaConfig ? lambdaConfig.ConfigOptions.Role : null },
     { type: "input", name: "Handler", message: "Handler:",  default: lambdaConfig ? lambdaConfig.ConfigOptions.Handler : "index.handler" },
+    { type: "input", name: "RoleName", message: "RoleName:",  default: lambdaConfig ? lambdaConfig.ConfigOptions.RoleName : "my-lambda-${env}" },
+    { type: "input", name: "PolicyName", message: "PolicyName:",  default: lambdaPolicy ? lambdaPolicy.PolicyName : "my-lambda-${env}-lambda" },
     { type: "input", name: "MemorySize", message: "MemorySize:",  default: lambdaConfig ? lambdaConfig.ConfigOptions.MemorySize : "128" },
     { type: "input", name: "Timeout", message: "Timeout:",  default: lambdaConfig ? lambdaConfig.ConfigOptions.Timeout : "3" },
     { type: "input", name: "Runtime", message: "Runtime:",  default: lambdaConfig ? lambdaConfig.ConfigOptions.Runtime : "nodejs8.10" }
   ]).then(config_answers => {
     const lambdaConfigFile =
 `module.exports = env => ({
-  Region: '${config_answers.Region}',
+  Region: "${config_answers.Region}",
   ConfigOptions: {
     FunctionName: \`${config_answers.FunctionName}\`,
-    Description: '${config_answers.Description}',
-    Role: '${config_answers.Role}',
-    Handler: '${config_answers.Handler}',
+    Description: "${config_answers.Description}",
+    Handler: "${config_answers.Handler}",
+    RoleName: \`${config_answers.RoleName}\`,
     MemorySize: ${config_answers.MemorySize},
     Timeout: ${config_answers.Timeout},
-    Runtime: '${config_answers.Runtime}',
+    Runtime: "${config_answers.Runtime}",
     Environment: {
       Variables: {
         NODE_ENV: env
       }
     }
   }
-});`
+})`
     const lambdaPackage = require(path.join(__dirname, "src/package.json"))
     lambdaPackage.name = config_answers.FunctionName
     lambdaPackage.description = config_answers.Description
     fs.writeFileSync(path.join(__dirname, "/src/package.json"), JSON.stringify(lambdaPackage, null, 2))
     fs.writeFileSync(path.join(__dirname, "/lambda-config.js"), lambdaConfigFile)
-    console.log(clc.green("Lambda configuration saved"))
+    const lambdaPolicyFile =
+`module.exports = env => ({
+  PolicyName: \`${config_answers.PolicyName}\`,
+  Prefix: \`/\${env}/\`,
+${JSON.stringify({
+    PolicyDocument: basicLambdaPolicy
+  }, null, 2).slice(2, -2)}
+})`
+    fs.writeFileSync(path.join(__dirname, "/lambda-policy.js"), lambdaPolicyFile)
+    success("Lambda configuration saved")
     next()
   })
-    .catch(console.log)
+    .catch(error)
 })
 
 /**
@@ -133,24 +173,34 @@ gulp.task("install", () => {
  *  @task {create}
  *  @order {4}
  */
-gulp.task("create", next => {
-  zipdir(path.join(__dirname, "src"), (err, ZipFile) => {
-    const { ConfigOptions, Region: region } = getLambdaConfig()
-
-    if (err) return console.log(clc.red("FAILED"), "-", clc.red(err))
-    const params = ConfigOptions
-    const lambda = new AWS.Lambda({ credentials, region })
-    params.Code = { ZipFile }
-
-    lambda.createFunction(params, (err, data) => {
-      if (err){
-        console.log(clc.red("FAILED"), "-", clc.red(err.message))
-        console.log(err)
-      }
-      else console.log(clc.green("SUCCESS"), "- lambda", clc.cyan(data.FunctionName), "created")
-      next()
+gulp.task("create", () => {
+  return zipdir(path.join(__dirname, "src"))
+    .then(ZipFile => {
+      const { ConfigOptions, Region: region } = getLambdaConfig()
+      const { PolicyName, PolicyDocument, Prefix: policyPrefix } = getLambdaPolicy()
+      const state = {}
+      const promises = [
+        createRole(ConfigOptions.RoleName, `${ConfigOptions.FunctionName} lambda role`, basicAssumeRolePolicy, `/${env}/`, credentials, region)
+          .then(({ Role: { RoleName: roleName, Arn: roleArn } }) => {
+            state.roleArn = roleArn
+            success(`Role ${roleName} created`)
+          }),
+        createPolicy(PolicyName, `Lambda "${ConfigOptions.FunctionName}" project policy attached to "${ConfigOptions.RoleName}"`, PolicyDocument, policyPrefix, credentials, region)
+          .then(({ Policy: { Arn: policyArn } }) => {
+            Object.assign(state, { policyArn })
+            success(`Policy ${PolicyName} created`)
+          })
+      ]
+      return Promise.all(promises)
+        .then(() => attachRolePolicy(state.policyArn, ConfigOptions.RoleName, credentials, region))
+        .then(() => {
+          success(`Policy ${PolicyName} attached to ${ConfigOptions.RoleName}`)
+          return createLambda(ConfigOptions.FunctionName, region, ConfigOptions.Description, ConfigOptions.Handler, ConfigOptions.MemorySize, ConfigOptions.Timeout, ConfigOptions.Runtime, state.roleArn, ZipFile, credentials)
+        })
+        .then(() => success(`lambda ${ConfigOptions.FunctionName} created`))
+        .catch(error)
     })
-  })
+    .catch(error)
 })
 
 /**
@@ -169,21 +219,22 @@ gulp.task("update", ["update-config", "update-code"])
  *  @order {6}
  */
 gulp.task("update-code", next => {
-  zipdir(path.join(__dirname, "src"), (err, ZipFile) => {
-    if (err) return console.log(clc.red("FAILED"), "-", clc.red(err))
-    const { Region: region, ConfigOptions: { FunctionName } } = getLambdaConfig()
-    const lambda = new AWS.Lambda({ credentials, region })
-    lambda.updateFunctionCode({ FunctionName, ZipFile }).promise()
-      .then(data => {
-        console.log(clc.green("SUCCESS"), "- lambda", clc.cyan(data.FunctionName), "code updated")
-        console.log(data)
-        next()
-      })
-      .catch(err => {
-        console.log(clc.red("FAILED"), "-", clc.red(err.message))
-        next(err)
-      })
-  })
+  return zipdir(path.join(__dirname, "src"))
+    .then(ZipFile => {
+      const { Region: region, ConfigOptions: { FunctionName } } = getLambdaConfig()
+      const lambda = new AWS.Lambda({ credentials, region })
+      lambda.updateFunctionCode({ FunctionName, ZipFile }).promise()
+        .then(data => {
+          success("lambda", clc.cyan(data.FunctionName), "code updated")
+          console.log(data)
+          // next()
+        })
+        .catch(err => {
+          error(err)
+          next(err)
+        })
+    })
+    .catch(error)
 })
 
 /**
@@ -192,20 +243,19 @@ gulp.task("update-code", next => {
  *  @task {update-config}
  *  @order {7}
  */
-gulp.task("update-config", next => {
+gulp.task("update-config", () => {
   const { Region: region, ConfigOptions } = getLambdaConfig()
-  const lambda = new AWS.Lambda({ credentials, region })
+  const { FunctionName: functionName } = ConfigOptions
+  const { PolicyName, Prefix, PolicyDocument } = getLambdaPolicy()
+  delete ConfigOptions.FunctionName
+  delete ConfigOptions.RoleName
 
-  lambda.updateFunctionConfiguration(ConfigOptions).promise()
-    .then(data => {
-      console.log(clc.green("SUCCESS"), "- lambda", clc.cyan(data.FunctionName), "config updated")
-      console.log(data)
-      next()
-    })
-    .catch(err => {
-      console.log(clc.red("FAILED"), "-", clc.red(err.message))
-      next(err)
-    })
+  const updates = [
+    updateLambdaConfiguration(functionName, ConfigOptions, credentials, region).then(() => success("Lambda config updated")),
+    updatePolicyDocument(PolicyName, Prefix, PolicyDocument, credentials, region).then(() => success("Lambda policy document updated"))
+  ]
+  return Promise.all(updates)
+    .catch(error)
 })
 
 /**
@@ -213,18 +263,27 @@ gulp.task("update-config", next => {
  *  @task {update-config}
  *  @order {8}
  */
-gulp.task("delete", next => {
-  const { Region: region, ConfigOptions: { FunctionName } } = getLambdaConfig()
-  const lambda = new AWS.Lambda({ credentials, region })
-  lambda.deleteFunction({ FunctionName }).promise()
+gulp.task("delete", () => {
+  const { Region: region, ConfigOptions: { FunctionName, RoleName } } = getLambdaConfig()
+  const { PolicyName, Prefix } = getLambdaPolicy()
+  const state = {}
+  return getPolicyArn(PolicyName, Prefix, credentials, region)
+    .then(policyArn => {
+      state.policyArn = policyArn
+      const promises = [
+        detachRolePolicy(policyArn, RoleName, credentials, region).then(() => success(`Policy ${PolicyName} detached`)),
+        deleteLambda(FunctionName, region, credentials).then(() => success(`lambda ${FunctionName} deleted`))
+      ]
+      return Promise.all(promises)
+    })
     .then(() => {
-      console.log(clc.green("SUCCESS"), "- lambda deleted")
-      next()
+      const deletes = [
+        deleteRole(RoleName, credentials, region).then(() => success(`Role ${RoleName} deleted`)),
+        deletePolicy(state.policyArn, credentials, region).then(() => success(`Policy ${PolicyName} deleted`))
+      ]
+      return Promise.all(deletes)
     })
-    .catch(err => {
-      console.log(clc.red("FAILED"), "-", clc.red(err.message))
-      next(err)
-    })
+    .catch(error)
 })
 
 /**
@@ -263,25 +322,21 @@ gulp.task("invoke", next => {
   } catch(err) {
     return next(err)
   }
-  lambda.invoke({
+  return lambda.invoke({
     FunctionName,
     InvocationType: "RequestResponse",
     LogType: "None",
     Payload
   }).promise()
     .then(data => {
-      console.log(clc.green("SUCCESS"), "- lambda invocation done")
+      success("lambda invocation done")
       try {
         console.log(JSON.parse(data.Payload))
       } catch (_) {
         console.log(data.Payload)
       }
-      next()
     })
-    .catch(err => {
-      console.log(clc.red("FAILED"), "-", clc.red(err.message))
-      next(err)
-    })
+    .catch(error)
 })
 
 /**
