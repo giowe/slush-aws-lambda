@@ -11,16 +11,14 @@ const AWS = require("aws-sdk")
 const CwLogs = require("aws-cwlogs")
 const { env = "staging", debug } = require("simple-argv")
 const {
-  iam: {
-    role: { create: createRole, delete: deleteRole, basicAssumeRolePolicy },
-    policy: { create: createPolicy, attachRolePolicy, basicLambdaPolicy, detachRolePolicy, delete: deletePolicy, getPolicyArn, updateDocument: updatePolicyDocument }
-  },
-  lambda: {
-    create: createLambda,
-    delete: deleteLambda,
-    updateConfiguration: updateLambdaConfiguration
-  }
-} = require("aws-valkyrie-utils")
+  role: { create: createRole, delete: deleteRole, basicAssumeRolePolicy },
+  policy: { create: createPolicy, attachRolePolicy, basicLambdaPolicy, detachRolePolicy, delete: deletePolicy, getPolicyArn, updateDocument: updatePolicyDocument }
+} = require("./utils/iam.js")
+const {
+  create: createLambda,
+  delete: deleteLambda,
+  updateConfiguration: updateLambdaConfiguration
+} = require("./utils/lambda.js")
 const success = (...args) => console.log("[" + clc.green("SUCCESS") + "]", ...args)
 const error = err => console.error("[" + clc.red("ERROR") + "]", err.message, debug ? err.stack : "")
 
