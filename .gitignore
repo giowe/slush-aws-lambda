@@ -1,4 +1,5 @@
 node_modules/
+templates/node_modules
 .idea/
 test-lambda/
 user_defaults.json
