@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "aws-sdk": "^2.220.1",
-    "eslint": "^4.19.1"
+    "eslint": "^4.19.1",
+    "@soluzioni-futura/eslint-config-soluzioni-futura": "^1.0.1"
   }
 }

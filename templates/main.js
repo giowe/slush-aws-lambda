@@ -1,2 +1,2 @@
-const path = require('path');
-require(path.join(__dirname, 'test-local.js'))(function(){});
+const path = require("path")
+require(path.join(__dirname, "test-local.js"))(function(){})
