@@ -17,7 +17,7 @@ e.generateRetryFn = (promiseFnWrapper, retries = 3) => async function retryFn(ma
 
 const clients = {}
 e.getServiceInstance = service => (credentials, region) => {
-  if (clients.apiGateway) {
+  if (clients[service]) {
     return clients[service]
   } else {
     return clients[service] = new AWS[service]({ credentials, region })
