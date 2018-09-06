@@ -1,11 +1,12 @@
+/* eslint-disable no-console */
 const { promisify } = require("util")
 const clc = require("cli-color")
 const zipdir = promisify(require("zip-dir"))
 const gulp = require("gulp")
 const usage = require("gulp-help-doc")
 const install = require("gulp-install")
-const fs = require("fs")
-const path = require("path")
+const { writeFileSync } = require("fs")
+const { join } = require("path")
 const inquirer = require("inquirer")
 const AWS = require("aws-sdk")
 const CwLogs = require("aws-cwlogs")
@@ -26,7 +27,7 @@ let lambdaConfig
 const getLambdaConfig = () => {
   if (!lambdaConfig) {
     try {
-      lambdaConfig = require(path.join(__dirname, "lambda-config.js"))(env)
+      lambdaConfig = require(join(__dirname, "lambda-config.js"))(env)
       console.log(`Using ${env === "production" ? clc.yellow(env) : clc.green(env)} lambda-config.js`)
     } catch (err) {
       if (err.message.indexOf("Cannot find module") !== -1) {
@@ -42,7 +43,7 @@ let lambdaPolicy
 const getLambdaPolicy = () => {
   if (!lambdaPolicy) {
     try {
-      lambdaPolicy = require(path.join(__dirname, "lambda-policy.js"))(env)
+      lambdaPolicy = require(join(__dirname, "lambda-policy.js"))(env)
       console.log(`Using ${env === "production" ? clc.yellow(env) : clc.green(env)} lambda-policy.js`)
     } catch (err) {
       if (err.message.indexOf("Cannot find module") !== -1) {
@@ -57,7 +58,7 @@ const getLambdaPolicy = () => {
 
 let credentials
 try {
-  credentials = require(path.join(__dirname, ".credentials.json"))
+  credentials = require(join(__dirname, ".credentials.json"))
 } catch(ignore) {
   console.log("project specific AWS credentials not found, using global credentials; run \"gulp credentials\" to setup project specific credentials;")
 }
@@ -87,7 +88,7 @@ gulp.task("credentials", () => {
       if (accessKeyId) credentials.accessKeyId = accessKeyId
       if (secretAccessKey) credentials.secretAccessKey = secretAccessKey
 
-      fs.writeFileSync(path.join(__dirname, ".credentials.json"), JSON.stringify(credentials, null, 2))
+      writeFileSync(join(__dirname, ".credentials.json"), JSON.stringify(credentials, null, 2))
     })
     .catch(error)
 })
@@ -101,8 +102,8 @@ gulp.task("configure", next => {
   let lambdaConfig
   let lambdaPolicy
   try {
-    lambdaConfig = require(path.join(__dirname, "lambda-config.js"))("${env}")
-    lambdaPolicy = require(path.join(__dirname, "lambda-policy.js"))("${env}")
+    lambdaConfig = require(join(__dirname, "lambda-config.js"))("${env}")
+    lambdaPolicy = require(join(__dirname, "lambda-policy.js"))("${env}")
   } catch(_) {}
 
   inquirer.prompt([
@@ -134,11 +135,11 @@ gulp.task("configure", next => {
     }
   }
 })`
-    const lambdaPackage = require(path.join(__dirname, "src/package.json"))
+    const lambdaPackage = require(join(__dirname, "src/package.json"))
     lambdaPackage.name = config_answers.FunctionName
     lambdaPackage.description = config_answers.Description
-    fs.writeFileSync(path.join(__dirname, "/src/package.json"), JSON.stringify(lambdaPackage, null, 2))
-    fs.writeFileSync(path.join(__dirname, "/lambda-config.js"), lambdaConfigFile)
+    writeFileSync(join(__dirname, "/src/package.json"), JSON.stringify(lambdaPackage, null, 2))
+    writeFileSync(join(__dirname, "/lambda-config.js"), lambdaConfigFile)
     const lambdaPolicyFile =
 `module.exports = env => ({
   PolicyName: \`${config_answers.PolicyName}\`,
@@ -147,7 +148,7 @@ ${JSON.stringify({
     PolicyDocument: basicLambdaPolicy
   }, null, 2).slice(2, -2)}
 })`
-    fs.writeFileSync(path.join(__dirname, "/lambda-policy.js"), lambdaPolicyFile)
+    writeFileSync(join(__dirname, "/lambda-policy.js"), lambdaPolicyFile)
     success("Lambda configuration saved")
     next()
   })
@@ -160,7 +161,7 @@ ${JSON.stringify({
  *  @order {3}
  */
 gulp.task("install", () => {
-  return gulp.src(path.join(__dirname, "src/package.json"))
+  return gulp.src(join(__dirname, "src/package.json"))
     .pipe(install())
 })
 
@@ -172,7 +173,7 @@ gulp.task("install", () => {
  *  @order {4}
  */
 gulp.task("create", () => {
-  return zipdir(path.join(__dirname, "src"))
+  return zipdir(join(__dirname, "src"))
     .then(ZipFile => {
       const { ConfigOptions, Region: region } = getLambdaConfig()
       const { PolicyName, PolicyDocument, Prefix: policyPrefix } = getLambdaPolicy()
@@ -217,7 +218,7 @@ gulp.task("update", ["update-policy", "update-config", "update-code"])
  *  @order {6}
  */
 gulp.task("update-code", next => {
-  return zipdir(path.join(__dirname, "src"))
+  return zipdir(join(__dirname, "src"))
     .then(ZipFile => {
       const { Region: region, ConfigOptions: { FunctionName } } = getLambdaConfig()
       const lambda = new AWS.Lambda({ credentials, region })
@@ -353,5 +354,5 @@ gulp.task("invoke", next => {
  * @order {12}
  */
 gulp.task("invoke-local", next => {
-  require(path.join(__dirname, "test-local.js"))(next)
+  require(join(__dirname, "utils", "test-local.js"))(next)
 })

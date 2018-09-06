@@ -6,38 +6,39 @@ const replace = require("gulp-replace")
 const rename = require("gulp-rename")
 const inquirer = require("inquirer")
 const del = require("del")
-const fs = require("fs")
+const { mkdirSync, writeFileSync } = require("fs")
 const { join } = require("path")
 
 gulp.task("default", done => {
+  const defaultsPath = join(__dirname, "userDefaults.json")
   let userDefaults
   try {
-    userDefaults = require("./userDefaults.json")
-  } catch(ignore) {}
+    userDefaults = require(defaultsPath)
+  } catch(ignore) {
+    userDefaults = {
+      license: "MIT",
+      repoType: "git"
+    }
+  }
 
   inquirer.prompt([
     { type: "input", name: "name", message: "Project name:", default: "test-lambda" },
     { type: "input", name: "version", message: "Project version:", default: "0.0.0" },
     { type: "input", name: "description", message: "Project description:" },
-    { type: "input", name: "authorName", message: "Project author name:", default: userDefaults ? userDefaults.authorName : null },
-    { type: "input", name: "authorEmail", message: "Project author email:", default: userDefaults ? userDefaults.authorEmail : null },
-    { type: "input", name: "repoType", message: "Project repo type:", default: userDefaults ? userDefaults.repoType : "git" },
+    { type: "input", name: "authorName", message: "Project author name:", default: userDefaults.authorName },
+    { type: "input", name: "authorEmail", message: "Project author email:", default: userDefaults.authorEmail },
+    { type: "input", name: "repoType", message: "Project repo type:", default: userDefaults.repoType },
     { type: "input", name: "repoUrl", message: "Project repo url:" },
-    { type: "input", name: "license", message: "Project license:", default: userDefaults ? userDefaults.license : "MIT" }
+    { type: "input", name: "license", message: "Project license:", default: userDefaults.license }
   ]).then(answers => {
-    userDefaults = ["authorName", "authorEmail", "repoType", "license"].reduce((key, acc) => {
-      acc[key] =  answers[key]
+    userDefaults = ["authorName", "authorEmail", "repoType", "license"].reduce((acc, key) => {
+      acc[key] = answers[key]
       return acc
     }, {})
 
-    fs.writeFile(join(__dirname, "/userDefaults.json"), JSON.stringify(userDefaults, null, 2), err => {
-      if (err) {
-        console.log(clc.red(err))
-      }
-    })
+    writeFileSync(defaultsPath, JSON.stringify(userDefaults, null, 2))
 
     const projectFolder = answers.name
-    const folders = ["src"]
 
     const _template = src => {
       return Object.entries(answers).reduce((acc, [key, value]) => {
@@ -47,16 +48,14 @@ gulp.task("default", done => {
       }, gulp.src(src))
     }
 
-    const scaffold = () => {
-      fs.mkdirSync(projectFolder)
-      for (let i = 0; i < folders.length; i++) {
-        fs.mkdirSync(join(projectFolder, folders[i]))
-      }
+    const _scaffold = () => {
+      mkdirSync(projectFolder)
+      ;["src", "utils"].forEach(folder => mkdirSync(join(projectFolder, folder)))
 
       gulp.src([
-        join(__dirname, "/templates/.editorconfig"),
-        join(__dirname, "/templates/.eslintrc"),
-        join(__dirname, "/templates/test-payload.json")
+        join(__dirname, "templates/.editorconfig"),
+        join(__dirname, "templates/.eslintrc"),
+        join(__dirname, "templates/test-payload.json")
       ])
         .pipe(gulp.dest(projectFolder))
 
@@ -73,20 +72,23 @@ gulp.task("default", done => {
       ])
         .pipe(gulp.dest(join(projectFolder, "src")))
 
+      gulp.src(join(__dirname, "templates/utils/**/*"))
+        .pipe(gulp.dest(join(projectFolder, "utils")))
+
       _template(join(__dirname, "templates/package.json"))
         .pipe(gulp.dest(projectFolder)).pipe(install())
 
-      _template(join(__dirname, "/templates/src/package.json"))
+      _template(join(__dirname, "templates/src/package.json"))
         .pipe(gulp.dest(join(projectFolder, "src")))
 
-      _template(join(__dirname, "/templates/README.md"))
+      _template(join(__dirname, "templates/README.md"))
         .pipe(gulp.dest(projectFolder))
 
       done()
     }
 
     try {
-      scaffold()
+      _scaffold()
     } catch(err) {
       console.log(err)
       console.log(`${clc.red("!")} ${clc.cyan(answers.name)} folder already exists!`)
@@ -94,7 +96,7 @@ gulp.task("default", done => {
         .then(({ confirm }) => {
           if (confirm){
             del.sync(answers.name, { force:true })
-            scaffold()
+            _scaffold()
           }
           else {
             console.log(`${clc.red("!")} Scaffolding process aborted.`)

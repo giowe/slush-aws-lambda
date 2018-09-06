@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const clc = require("cli-color")
 const { join } = require("path")
 const { env = "staging" } = require("simple-argv")
@@ -6,7 +7,7 @@ const { env = "staging" } = require("simple-argv")
 module.exports = next => {
   let lambdaConfig
   try {
-    lambdaConfig = require(join(__dirname, "lambda-config.js"))(env)
+    lambdaConfig = require(join(__dirname, "..", "lambda-config.js"))(env)
   } catch (err) {
     if (err.message.indexOf("Cannot find module") !== -1) {
       throw new Error(`WARNING! lambda config not found, run command ${clc.cyan("gulp configure")}`)
@@ -18,7 +19,7 @@ module.exports = next => {
 
   let payload
   try {
-    payload = require("./test-payload.js")
+    payload = require(join(__dirname, "..", "test-payload.js"))
   } catch (err) {
     if (err.message.indexOf("Cannot find module") !== -1) {
       throw new Error("WARNING! \"test-payload.js\" not found!")

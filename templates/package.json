@@ -19,7 +19,7 @@
     "url": "%repoUrl%"
   },
   "license": "%license%",
-  "main": "main.js",
+  "main": "utils/main.js",
   "dependencies": {
     "aws-cwlogs": "^2.5.0",
     "cli-color": "^1.3.0",
