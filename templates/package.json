@@ -7,11 +7,11 @@
     "postinstall": "gulp install",
     "test": "gulp invoke-local"
   },
-  "author": "%author_name% <%author_email%>",
+  "author": "%authorName% <%authorEmail%>",
   "contributors": [
     {
-      "name": "%author_name%",
-      "email": "%author_email%"
+      "name": "%authorName%",
+      "email": "%authorEmail%"
     }
   ],
   "repository": {
@@ -22,17 +22,17 @@
   "main": "main.js",
   "dependencies": {
     "aws-cwlogs": "^2.5.0",
-    "cli-color": "^1.2.0",
+    "cli-color": "^1.3.0",
     "gulp": "^3.9.1",
-    "gulp-help-doc": "^1.1.0",
+    "gulp-help-doc": "^1.1.1",
     "gulp-install": "^1.1.0",
-    "inquirer": "^5.2.0",
-    "moment": "^2.22.0",
+    "inquirer": "^6.2.0",
+    "moment": "^2.22.2",
     "zip-dir": "^1.0.2"
   },
   "devDependencies": {
-    "aws-sdk": "^2.220.1",
-    "eslint": "^4.19.1",
+    "aws-sdk": "^2.309.0",
+    "eslint": "^5.5.0",
     "@soluzioni-futura/eslint-config-soluzioni-futura": "^1.0.1"
   }
 }

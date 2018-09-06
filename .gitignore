@@ -2,7 +2,7 @@ node_modules/
 templates/node_modules
 .idea/
 test-lambda/
-user_defaults.json
+userDefaults.json
 *.log
 package-lock.json.*
 .credentials.json

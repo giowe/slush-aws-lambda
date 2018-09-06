@@ -2,10 +2,10 @@
   "private": true,
   "name": "%name%",
   "description": "%description%",
-  "author": "%author_name% <%author_email%>",
+  "author": "%authorName% <%authorEmail%>",
   "contributors": [{
-    "name": "%author_name%",
-    "email": "%author_email%"
+    "name": "%authorName%",
+    "email": "%authorEmail%"
   }],
   "dependencies": {
   }
