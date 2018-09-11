@@ -56,7 +56,7 @@ module.exports = next => {
   if (Environment && Environment.Variables) {
     Object.assign(process.env, Environment.Variables)
   }
-  const lambda = require(join(__dirname, "src", handler[0]))[handler[1]]
+  const lambda = require(join(__dirname, "..", "src", handler[0]))[handler[1]]
 
   lambda(payload, { fail, succeed, done }, callback)
 }
