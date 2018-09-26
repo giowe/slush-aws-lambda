@@ -178,19 +178,16 @@ gulp.task("create", () => {
       const { ConfigOptions, Region: region } = getLambdaConfig()
       const { PolicyName, PolicyDocument, Prefix: policyPrefix } = getLambdaPolicy()
       const state = {}
-      const promises = [
-        createRole(ConfigOptions.RoleName, `${ConfigOptions.FunctionName} lambda role`, basicAssumeRolePolicy, `/${env}/`, credentials, region)
-          .then(({ Role: { RoleName: roleName, Arn: roleArn } }) => {
-            state.roleArn = roleArn
-            success(`Role ${roleName} created`)
-          }),
-        createPolicy(PolicyName, `Lambda "${ConfigOptions.FunctionName}" project policy attached to "${ConfigOptions.RoleName}"`, PolicyDocument, policyPrefix, credentials, region)
-          .then(({ Policy: { Arn: policyArn } }) => {
-            Object.assign(state, { policyArn })
-            success(`Policy ${PolicyName} created`)
-          })
-      ]
-      return Promise.all(promises)
+      return createPolicy(PolicyName, `Lambda "${ConfigOptions.FunctionName}" project policy attached to "${ConfigOptions.RoleName}"`, PolicyDocument, policyPrefix, credentials, region)
+        .then(({ Policy: { Arn: policyArn } }) => {
+          Object.assign(state, { policyArn })
+          success(`Policy ${PolicyName} created`)
+          return createRole(ConfigOptions.RoleName, `${ConfigOptions.FunctionName} lambda role`, basicAssumeRolePolicy(policyArn.split(":")[4]), `/${env}/`, credentials, region)
+            .then(({ Role: { RoleName: roleName, Arn: roleArn } }) => {
+              state.roleArn = roleArn
+              success(`Role ${roleName} created`)
+            })
+        })
         .then(() => attachRolePolicy(state.policyArn, ConfigOptions.RoleName, credentials, region))
         .then(() => {
           success(`Policy ${PolicyName} attached to ${ConfigOptions.RoleName}`)
@@ -354,5 +351,5 @@ gulp.task("invoke", next => {
  * @order {12}
  */
 gulp.task("invoke-local", next => {
-  require(join(__dirname, "utils", "test-local.js"))(next)
+  require(join(__dirname, "utils", "test-local.js"))(next, credentials)
 })

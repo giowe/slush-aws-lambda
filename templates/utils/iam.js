@@ -1,21 +1,23 @@
+const AWS = require("aws-sdk")
 const { generateRetryFn, getServiceInstance } = require("./common.js")
 
 const e = module.exports = { role: {}, policy: {} }
 
 const getIamInstance = e.getIamInstance = getServiceInstance("IAM")
 
-e.role.basicAssumeRolePolicy = {
+e.role.basicAssumeRolePolicy = accountId => ({
   Version: "2012-10-17",
   Statement: [
     {
       Effect: "Allow",
       Principal: {
-        Service: "lambda.amazonaws.com"
+        Service: "lambda.amazonaws.com",
+        AWS: accountId
       },
       Action: "sts:AssumeRole"
     }
   ]
-}
+})
 
 e.role.create = (roleName, description, assumeRolePolicy, path, credentials, region) => {
   const iam = getIamInstance(credentials, region)
@@ -34,6 +36,31 @@ e.role.delete = (roleName, credentials, region) => {
   return generateRetryFn(() => {
     return iam.deleteRole({ RoleName: roleName }).promise()
   }, 10)()
+}
+
+e.role.assumeRole = (roleName, credentials, region) => {
+  const iam = getIamInstance(credentials, region)
+  const sts = getServiceInstance("STS")(credentials, region)
+  return iam.getRole({ RoleName: roleName }).promise()
+    .then(({ Role: { Arn: roleArn }}) => {
+      return sts.assumeRole({ RoleArn: roleArn, RoleSessionName: "invoke-local" }).promise()
+        .then(({ Credentials: { AccessKeyId, SecretAccessKey, SessionToken } }) => {
+          AWS.config.update({ region, credentials: new AWS.Credentials({ accessKeyId: AccessKeyId, secretAccessKey: SecretAccessKey, sessionToken: SessionToken }) })
+          process.env.AWS_ACCESS_KEY_ID = AccessKeyId
+          process.env.AWS_SECRET_ACCESS_KEY = SecretAccessKey
+          process.env.AWS_SESSION_TOKEN = SessionToken
+          process.env.AWS_REGION = region
+          console.log(`Assumed ${roleArn} role`)
+        })
+        .catch(err => {
+          if (err.code === "AccessDenied") {
+            console.error(new Error(`You are not allowed to assume ${roleArn} role`))
+            return err
+          } else {
+            throw err
+          }
+        })
+    })
 }
 
 e.policy.basicLambdaPolicy = {
