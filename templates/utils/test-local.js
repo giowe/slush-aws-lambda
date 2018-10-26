@@ -3,6 +3,7 @@ const clc = require("cli-color")
 const { join } = require("path")
 const { env = "staging" } = require("simple-argv")
 const { role: { assumeRole } } = require("./iam.js")
+const { getServiceInstance } = require("./common.js")
 
 module.exports = (next, credentials) => {
   let lambdaConfig
@@ -53,13 +54,30 @@ module.exports = (next, credentials) => {
   }
 
   const handler = Handler.split(".")
-  if (Environment && Environment.Variables) {
-    Object.assign(process.env, Environment.Variables)
-  }
   assumeRole(lambdaConfig.ConfigOptions.RoleName, credentials, lambdaConfig.Region)
     .then(() => {
       const lambda = require(join(__dirname, "..", "src", handler[0]))[handler[1]]
 
-      lambda(payload, { fail, succeed, done }, callback)
+      const kms = getServiceInstance("KMS")(credentials, lambdaConfig.Region)
+      return Promise.all(Object.keys(Environment.Variables).map(variable => {
+        return kms.decrypt({
+          CiphertextBlob: new Buffer(Environment.Variables[variable], "base64")
+        }).promise()
+          .then(({ Plaintext }) => {
+            Environment.Variables[variable] = Plaintext.toString()
+          })
+          .catch((err) => {
+            if (err.code !== "InvalidCiphertextException") {
+              throw err
+            }
+          })
+      }))
+        .then(() => {
+          if (Environment && Environment.Variables) {
+            Object.assign(process.env, Environment.Variables)
+          }
+
+          lambda(payload, { fail, succeed, done }, callback)
+        })
     })
 }
