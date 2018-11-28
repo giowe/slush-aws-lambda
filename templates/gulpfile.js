@@ -393,9 +393,8 @@ gulp.task("add-variable", () => {
  * @order {14}
  */
 gulp.task("encrypt", () => {
-  const { Region } = getLambdaConfig()
   const varsFile = require("./variables.json")
-  const { Variables, Encrypted } = varsFile
+  const { Variables } = varsFile
   const kms = getServiceInstance("KMS")(credentials, lambdaConfig.Region)
 
   const state = {}
