@@ -118,7 +118,7 @@ gulp.task("configure", next => {
     { type: "input", name: "Runtime", message: "Runtime:",  default: lambdaConfig ? lambdaConfig.ConfigOptions.Runtime : "nodejs8.10" }
   ]).then(config_answers => {
     const lambdaConfigFile =
-`module.exports = env => ({
+      `module.exports = env => ({
   Region: "${config_answers.Region}",
   ConfigOptions: {
     FunctionName: \`${config_answers.FunctionName}\`,
@@ -129,9 +129,7 @@ gulp.task("configure", next => {
     Timeout: ${config_answers.Timeout},
     Runtime: "${config_answers.Runtime}",
     Environment: {
-      Variables: {
-        NODE_ENV: env
-      }
+      Variables: Object.assign({ NODE_ENV: env }, require("./variables.json").Variables)
     }
   }
 })`
@@ -139,14 +137,17 @@ gulp.task("configure", next => {
     lambdaPackage.name = config_answers.FunctionName
     lambdaPackage.description = config_answers.Description
     writeFileSync(join(__dirname, "/src/package.json"), JSON.stringify(lambdaPackage, null, 2))
+    writeFileSync(join(__dirname, "/variables.json"), JSON.stringify({
+      Variables: {}
+    }, null, 2))
     writeFileSync(join(__dirname, "/lambda-config.js"), lambdaConfigFile)
     const lambdaPolicyFile =
-`module.exports = env => ({
+      `module.exports = env => ({
   PolicyName: \`${config_answers.PolicyName}\`,
   Prefix: \`/\${env}/\`,
 ${JSON.stringify({
-    PolicyDocument: basicLambdaPolicy
-  }, null, 2).slice(2, -2)}
+        PolicyDocument: basicLambdaPolicy
+      }, null, 2).slice(2, -2)}
 })`
     writeFileSync(join(__dirname, "/lambda-policy.js"), lambdaPolicyFile)
     success("Lambda configuration saved")
@@ -352,4 +353,32 @@ gulp.task("invoke", next => {
  */
 gulp.task("invoke-local", next => {
   require(join(__dirname, "utils", "test-local.js"))(next, credentials)
+})
+
+/**
+ * Add an env variable to lambda config
+ * @task {add-variable}
+ * @order {13}
+ */
+gulp.task("add-variable", () => {
+  const varsFile = require("./variables.json")
+  const { Variables } = varsFile
+
+  return inquirer.prompt([
+    { type: "input", name: "name", message: "name:"  },
+    { type: "input", name: "value", message: "value:" }
+  ])
+    .then(({ name, value }) => {
+      if (!name) {
+        throw new Error("Invalid variable name")
+      }
+      if (typeof Variables.name !== "undefined") {
+        throw new Error(`Variable ${name} already exists`)
+      }
+
+      Variables[name] = value
+
+      writeFileSync(join(__dirname, "variables.json"), JSON.stringify(varsFile, null, 2))
+    })
+    .catch(error)
 })
