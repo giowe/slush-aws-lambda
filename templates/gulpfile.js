@@ -20,6 +20,9 @@ const {
   delete: deleteLambda,
   updateConfiguration: updateLambdaConfiguration
 } = require("./utils/lambda.js")
+const {
+  getServiceInstance
+} = require("./utils/common.js")
 const success = (...args) => console.log("[" + clc.green("SUCCESS") + "]", ...args)
 const error = err => console.error("[" + clc.red("ERROR") + "]", err.message, debug ? err.stack : "")
 
@@ -382,3 +385,47 @@ gulp.task("add-variable", () => {
     })
     .catch(error)
 })
+
+
+/**
+ * Encrypt an env variable
+ * @task {encrypt}
+ * @order {14}
+ */
+gulp.task("encrypt", () => {
+  const { Region } = getLambdaConfig()
+  const varsFile = require("./variables.json")
+  const { Variables, Encrypted } = varsFile
+  const kms = getServiceInstance("KMS")(credentials, lambdaConfig.Region)
+
+  const state = {}
+
+  return kms.listAliases({}).promise()
+    .then(({ Aliases }) => {
+      return inquirer.prompt([
+        { type: "list", name: "key", message: "Choose KMS Key:", choices: Aliases.map(({ AliasName, TargetKeyId }) => ({ name: AliasName, value: TargetKeyId }))  }
+      ])
+    })
+    .then(({ key }) => {
+      state.key = key
+      return inquirer.prompt([
+        { type: "list", name: "toEncrypt", message: "Encrypt:", choices: Object.keys(Variables)  }
+      ])
+    })
+    .then(({ toEncrypt }) => {
+      state.toEncrypt = toEncrypt
+      return kms.encrypt({
+        KeyId: state.key,
+        Plaintext: Variables[toEncrypt]
+      }).promise()
+    })
+    .then(({ CiphertextBlob }) => {
+      Variables[state.toEncrypt] = new Buffer(CiphertextBlob, "base64").toString("base64")
+
+      writeFileSync(join(__dirname, "variables.json"), JSON.stringify(varsFile, null, 2))
+    })
+    .catch(error)
+})
+
+// const kms = getServiceInstance("KMS")(credentials, lambdaConfig.Region)
+
