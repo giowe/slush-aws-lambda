@@ -2,9 +2,10 @@
 const clc = require("cli-color")
 const { join } = require("path")
 const { env = "staging" } = require("simple-argv")
+const { role: { assumeRole } } = require("./iam.js")
+const { getServiceInstance } = require("./common.js")
 
-
-module.exports = next => {
+module.exports = (next, credentials) => {
   let lambdaConfig
   try {
     lambdaConfig = require(join(__dirname, "..", "lambda-config.js"))(env)
@@ -53,10 +54,14 @@ module.exports = next => {
   }
 
   const handler = Handler.split(".")
-  if (Environment && Environment.Variables) {
-    Object.assign(process.env, Environment.Variables)
-  }
-  const lambda = require(join(__dirname, "..", "src", handler[0]))[handler[1]]
+  assumeRole(lambdaConfig.ConfigOptions.RoleName, credentials, lambdaConfig.Region)
+    .then(() => {
+      const lambda = require(join(__dirname, "..", "src", handler[0]))[handler[1]]
 
-  lambda(payload, { fail, succeed, done }, callback)
+      if (Environment && Environment.Variables) {
+        Object.assign(process.env, Environment.Variables)
+      }
+
+      lambda(payload, { fail, succeed, done }, callback)
+    })
 }

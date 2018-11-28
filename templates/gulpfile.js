@@ -20,6 +20,9 @@ const {
   delete: deleteLambda,
   updateConfiguration: updateLambdaConfiguration
 } = require("./utils/lambda.js")
+const {
+  getServiceInstance
+} = require("./utils/common.js")
 const success = (...args) => console.log("[" + clc.green("SUCCESS") + "]", ...args)
 const error = err => console.error("[" + clc.red("ERROR") + "]", err.message, debug ? err.stack : "")
 
@@ -118,7 +121,7 @@ gulp.task("configure", next => {
     { type: "input", name: "Runtime", message: "Runtime:",  default: lambdaConfig ? lambdaConfig.ConfigOptions.Runtime : "nodejs8.10" }
   ]).then(config_answers => {
     const lambdaConfigFile =
-`module.exports = env => ({
+      `module.exports = env => ({
   Region: "${config_answers.Region}",
   ConfigOptions: {
     FunctionName: \`${config_answers.FunctionName}\`,
@@ -129,9 +132,7 @@ gulp.task("configure", next => {
     Timeout: ${config_answers.Timeout},
     Runtime: "${config_answers.Runtime}",
     Environment: {
-      Variables: {
-        NODE_ENV: env
-      }
+      Variables: Object.assign({ NODE_ENV: env }, require("./variables.json").Variables)
     }
   }
 })`
@@ -139,14 +140,17 @@ gulp.task("configure", next => {
     lambdaPackage.name = config_answers.FunctionName
     lambdaPackage.description = config_answers.Description
     writeFileSync(join(__dirname, "/src/package.json"), JSON.stringify(lambdaPackage, null, 2))
+    writeFileSync(join(__dirname, "/variables.json"), JSON.stringify({
+      Variables: {}
+    }, null, 2))
     writeFileSync(join(__dirname, "/lambda-config.js"), lambdaConfigFile)
     const lambdaPolicyFile =
-`module.exports = env => ({
+      `module.exports = env => ({
   PolicyName: \`${config_answers.PolicyName}\`,
   Prefix: \`/\${env}/\`,
 ${JSON.stringify({
-    PolicyDocument: basicLambdaPolicy
-  }, null, 2).slice(2, -2)}
+        PolicyDocument: basicLambdaPolicy
+      }, null, 2).slice(2, -2)}
 })`
     writeFileSync(join(__dirname, "/lambda-policy.js"), lambdaPolicyFile)
     success("Lambda configuration saved")
@@ -178,19 +182,16 @@ gulp.task("create", () => {
       const { ConfigOptions, Region: region } = getLambdaConfig()
       const { PolicyName, PolicyDocument, Prefix: policyPrefix } = getLambdaPolicy()
       const state = {}
-      const promises = [
-        createRole(ConfigOptions.RoleName, `${ConfigOptions.FunctionName} lambda role`, basicAssumeRolePolicy, `/${env}/`, credentials, region)
-          .then(({ Role: { RoleName: roleName, Arn: roleArn } }) => {
-            state.roleArn = roleArn
-            success(`Role ${roleName} created`)
-          }),
-        createPolicy(PolicyName, `Lambda "${ConfigOptions.FunctionName}" project policy attached to "${ConfigOptions.RoleName}"`, PolicyDocument, policyPrefix, credentials, region)
-          .then(({ Policy: { Arn: policyArn } }) => {
-            Object.assign(state, { policyArn })
-            success(`Policy ${PolicyName} created`)
-          })
-      ]
-      return Promise.all(promises)
+      return createPolicy(PolicyName, `Lambda "${ConfigOptions.FunctionName}" project policy attached to "${ConfigOptions.RoleName}"`, PolicyDocument, policyPrefix, credentials, region)
+        .then(({ Policy: { Arn: policyArn } }) => {
+          Object.assign(state, { policyArn })
+          success(`Policy ${PolicyName} created`)
+          return createRole(ConfigOptions.RoleName, `${ConfigOptions.FunctionName} lambda role`, basicAssumeRolePolicy(policyArn.split(":")[4]), `/${env}/`, credentials, region)
+            .then(({ Role: { RoleName: roleName, Arn: roleArn } }) => {
+              state.roleArn = roleArn
+              success(`Role ${roleName} created`)
+            })
+        })
         .then(() => attachRolePolicy(state.policyArn, ConfigOptions.RoleName, credentials, region))
         .then(() => {
           success(`Policy ${PolicyName} attached to ${ConfigOptions.RoleName}`)
@@ -354,5 +355,77 @@ gulp.task("invoke", next => {
  * @order {12}
  */
 gulp.task("invoke-local", next => {
-  require(join(__dirname, "utils", "test-local.js"))(next)
+  require(join(__dirname, "utils", "test-local.js"))(next, credentials)
 })
+
+/**
+ * Add an env variable to lambda config
+ * @task {add-variable}
+ * @order {13}
+ */
+gulp.task("add-variable", () => {
+  const varsFile = require("./variables.json")
+  const { Variables } = varsFile
+
+  return inquirer.prompt([
+    { type: "input", name: "name", message: "name:"  },
+    { type: "input", name: "value", message: "value:" }
+  ])
+    .then(({ name, value }) => {
+      if (!name) {
+        throw new Error("Invalid variable name")
+      }
+      if (typeof Variables.name !== "undefined") {
+        throw new Error(`Variable ${name} already exists`)
+      }
+
+      Variables[name] = value
+
+      writeFileSync(join(__dirname, "variables.json"), JSON.stringify(varsFile, null, 2))
+    })
+    .catch(error)
+})
+
+
+/**
+ * Encrypt an env variable
+ * @task {encrypt}
+ * @order {14}
+ */
+gulp.task("encrypt", () => {
+  const { Region } = getLambdaConfig()
+  const varsFile = require("./variables.json")
+  const { Variables, Encrypted } = varsFile
+  const kms = getServiceInstance("KMS")(credentials, lambdaConfig.Region)
+
+  const state = {}
+
+  return kms.listAliases({}).promise()
+    .then(({ Aliases }) => {
+      return inquirer.prompt([
+        { type: "list", name: "key", message: "Choose KMS Key:", choices: Aliases.map(({ AliasName, TargetKeyId }) => ({ name: AliasName, value: TargetKeyId }))  }
+      ])
+    })
+    .then(({ key }) => {
+      state.key = key
+      return inquirer.prompt([
+        { type: "list", name: "toEncrypt", message: "Encrypt:", choices: Object.keys(Variables)  }
+      ])
+    })
+    .then(({ toEncrypt }) => {
+      state.toEncrypt = toEncrypt
+      return kms.encrypt({
+        KeyId: state.key,
+        Plaintext: Variables[toEncrypt]
+      }).promise()
+    })
+    .then(({ CiphertextBlob }) => {
+      Variables[state.toEncrypt] = new Buffer(CiphertextBlob, "base64").toString("base64")
+
+      writeFileSync(join(__dirname, "variables.json"), JSON.stringify(varsFile, null, 2))
+    })
+    .catch(error)
+})
+
+// const kms = getServiceInstance("KMS")(credentials, lambdaConfig.Region)
+
